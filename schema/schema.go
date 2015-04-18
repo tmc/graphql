@@ -2,6 +2,7 @@ package schema
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/tmc/graphql"
 )
@@ -50,5 +51,16 @@ func (s *Schema) RootCalls() map[string]CallHandler {
 }
 
 func (s *Schema) handleSchemaCall(c graphql.Call) (interface{}, error) {
-	return nil, fmt.Errorf("not implemented")
+	result := map[string]interface{}{}
+	rootCalls := []string{}
+	for _, field := range c.Fields {
+		if field.Name == "root_calls" {
+			for rootCall := range s.rootCalls {
+				rootCalls = append(rootCalls, rootCall)
+			}
+			sort.Strings(rootCalls)
+			result["root_calls"] = rootCalls
+		}
+	}
+	return result, nil
 }
