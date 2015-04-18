@@ -1,10 +1,10 @@
 {
 /* GraphQL-ish PEG grammar
 
+This implements a parser for a restricted subset of GraphQL
+
 Limitations:
- - is not actually implemented whatsoever
  - does not support named queries
- - does not support multiple arguments in calls
  - does not support field calls
 */
 package parser
