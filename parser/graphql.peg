@@ -2,6 +2,7 @@
 /* GraphQL PEG grammar
 
 Limitations:
+ - is not actually implemented whatsoever
  - does not support named queries
  - does not support multiple arguments in calls
  - does not support field calls

@@ -1,6 +1,7 @@
 /* GraphQL PEG grammar
 
 Limitations:
+ - is not actually implemented whatsoever
  - does not support named queries
  - does not support multiple arguments in calls
  - does not support field calls
@@ -23,20 +24,20 @@ var g = &grammar{
 	rules: []*rule{
 		{
 			name: "Query",
-			pos:  position{line: 12, col: 1, offset: 174},
+			pos:  position{line: 13, col: 1, offset: 216},
 			expr: &actionExpr{
-				pos: position{line: 12, col: 9, offset: 184},
+				pos: position{line: 13, col: 9, offset: 226},
 				run: (*parser).callonQuery1,
 				expr: &seqExpr{
-					pos: position{line: 12, col: 9, offset: 184},
+					pos: position{line: 13, col: 9, offset: 226},
 					exprs: []interface{}{
 						&litMatcher{
-							pos:        position{line: 12, col: 9, offset: 184},
+							pos:        position{line: 13, col: 9, offset: 226},
 							val:        "foobar",
 							ignoreCase: false,
 						},
 						&ruleRefExpr{
-							pos:  position{line: 12, col: 18, offset: 193},
+							pos:  position{line: 13, col: 18, offset: 235},
 							name: "EOF",
 						},
 					},
@@ -45,11 +46,11 @@ var g = &grammar{
 		},
 		{
 			name: "EOF",
-			pos:  position{line: 16, col: 1, offset: 233},
+			pos:  position{line: 17, col: 1, offset: 275},
 			expr: &notExpr{
-				pos: position{line: 16, col: 7, offset: 241},
+				pos: position{line: 17, col: 7, offset: 283},
 				expr: &anyMatcher{
-					line: 16, col: 8, offset: 242,
+					line: 17, col: 8, offset: 284,
 				},
 			},
 		},
