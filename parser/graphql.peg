@@ -25,11 +25,15 @@ Query ← call:Call EOF {
     return call, nil
 }
 
-Call ← name:Name '(' args:Arguments ')' fields:Fields {
+Call ← name:Name '(' args:Arguments ')' fields:Fields? {
+    fieldsV := graphql.Fields{}
+    if fields != nil {
+        fieldsV = fields.(graphql.Fields)
+    }
     return graphql.Call{
         Name: name.(string),
         Arguments: args.(graphql.Arguments),
-        Fields: fields.(graphql.Fields),
+        Fields: fieldsV,
     }, nil
 }
 
@@ -37,7 +41,7 @@ Name ← alphaNum+ {
     return string(c.text), nil
 }
 
-Arguments ← args:(argument (',' argument)*) {
+Arguments ← args:(argument (',' argument)*)? {
     result := graphql.Arguments{}
     argsV := ifs(args)
     if len(argsV) == 0 {
@@ -50,6 +54,7 @@ Arguments ← args:(argument (',' argument)*) {
     }
     return result, nil
 }
+
 argument ← alphaNum+ {
     return graphql.Argument(c.text), nil
 }
