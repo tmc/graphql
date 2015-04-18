@@ -1,5 +1,5 @@
 {
-/* GraphQL PEG grammar
+/* GraphQL-ish PEG grammar
 
 Limitations:
  - is not actually implemented whatsoever
@@ -8,10 +8,77 @@ Limitations:
  - does not support field calls
 */
 package parser
+
+import "github.com/tmc/graphql"
+
+// helper functions
+
+func ifs(v interface{}) []interface{} {
+    if v == nil {
+        return nil
+    }
+    return v.([]interface{})
+}
 }
 
-Query ← "foobar" EOF {
+Query ← call:Call EOF {
+    return call, nil
+}
+
+Call ← name:Name '(' args:Arguments ')' fields:Fields {
+    return graphql.Call{
+        Name: name.(string),
+        Arguments: args.(graphql.Arguments),
+        Fields: fields.(graphql.Fields),
+    }, nil
+}
+
+Name ← alphaNum+ {
     return string(c.text), nil
 }
+
+Arguments ← args:(argument (',' argument)*) {
+    result := graphql.Arguments{}
+    argsV := ifs(args)
+    if len(argsV) == 0 {
+        return result, nil
+    }
+    result = append(result, argsV[0].(graphql.Argument))
+    for _, arg := range ifs(argsV[1]) {
+        argSlice := ifs(arg)
+        result = append(result, argSlice[1].(graphql.Argument))
+    }
+    return result, nil
+}
+argument ← alphaNum+ {
+    return graphql.Argument(c.text), nil
+}
+
+Fields ← '{' fields:(field (',' field)*)? '}' {
+    result := graphql.Fields{}
+    fieldsV := ifs(fields)
+    if len(fieldsV) == 0 {
+        return result, nil
+    }
+    result = append(result, fieldsV[0].(graphql.Field))
+    for _, field := range ifs(fieldsV[1]) {
+        fieldSlice := ifs(field)
+        result = append(result, fieldSlice[1].(graphql.Field))
+    }
+    return result, nil
+}
+
+field ← field:(Name / Fields) {
+    switch f := field.(type) {
+    case string:
+        return graphql.Field{Name:f}, nil
+    case graphql.Fields:
+        return graphql.Field{Fields: f}, nil
+    default:
+        return nil, fmt.Errorf("unexpected type: %#v", f)
+    }
+}
+
+alphaNum ← [a-z0-9_]i
 
 EOF ← !.
