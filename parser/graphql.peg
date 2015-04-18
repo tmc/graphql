@@ -1,0 +1,16 @@
+{
+/* GraphQL PEG grammar
+
+Limitations:
+ - does not support named queries
+ - does not support multiple arguments in calls
+ - does not support field calls
+*/
+package parser
+}
+
+Query ← "foobar" EOF {
+    return string(c.text), nil
+}
+
+EOF ← !.
