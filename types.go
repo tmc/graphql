@@ -6,8 +6,8 @@ package graphql
 // node(42){fieldX}
 type Call struct {
 	Name      string
-	Arguments Arguments
-	Fields    Fields `json:",omitempty"`
+	Arguments Arguments `json:",omitempty"`
+	Fields    Fields    `json:",omitempty"`
 }
 
 // Argument is an argument to a Call
