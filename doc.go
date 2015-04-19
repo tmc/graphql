@@ -1,2 +1,2 @@
-// Package graphql implements a parser for GraphQL queries
+// Package graphql provides utilties to deal with graphql calls
 package graphql
