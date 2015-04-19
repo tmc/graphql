@@ -65,12 +65,20 @@ Fields ← '{' fields:(field (',' field)*)? '}' {
     return result, nil
 }
 
-field ← field:(Name / Fields) {
+FieldCall ← field:Name '.' call:Call {
+    callV := call.(graphql.Call)
+    callV.Name = field.(string) + "." + callV.Name
+    return callV, nil
+}
+
+field ← field:(FieldCall / Name / Fields) {
     switch f := field.(type) {
     case string:
         return graphql.Field{Name:f}, nil
     case graphql.Fields:
         return graphql.Field{Fields: f}, nil
+    case graphql.Call:
+        return graphql.Field{Call: f}, nil
     default:
         return nil, fmt.Errorf("unexpected type: %#v", f)
     }

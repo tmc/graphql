@@ -1,9 +1,3 @@
-/*Package parser implements an experimental PEG grammar for a subset of GraphQL.
-
-Limitations:
- - does not support named queries
- - does not support field calls
-*/
 package parser
 
 import (
@@ -33,23 +27,23 @@ var g = &grammar{
 	rules: []*rule{
 		{
 			name: "Query",
-			pos:  position{line: 22, col: 1, offset: 353},
+			pos:  position{line: 16, col: 1, offset: 189},
 			expr: &actionExpr{
-				pos: position{line: 22, col: 9, offset: 363},
+				pos: position{line: 16, col: 9, offset: 199},
 				run: (*parser).callonQuery1,
 				expr: &seqExpr{
-					pos: position{line: 22, col: 9, offset: 363},
+					pos: position{line: 16, col: 9, offset: 199},
 					exprs: []interface{}{
 						&labeledExpr{
-							pos:   position{line: 22, col: 9, offset: 363},
+							pos:   position{line: 16, col: 9, offset: 199},
 							label: "call",
 							expr: &ruleRefExpr{
-								pos:  position{line: 22, col: 14, offset: 368},
+								pos:  position{line: 16, col: 14, offset: 204},
 								name: "Call",
 							},
 						},
 						&ruleRefExpr{
-							pos:  position{line: 22, col: 19, offset: 373},
+							pos:  position{line: 16, col: 19, offset: 209},
 							name: "EOF",
 						},
 					},
@@ -58,46 +52,46 @@ var g = &grammar{
 		},
 		{
 			name: "Call",
-			pos:  position{line: 26, col: 1, offset: 403},
+			pos:  position{line: 20, col: 1, offset: 239},
 			expr: &actionExpr{
-				pos: position{line: 26, col: 8, offset: 412},
+				pos: position{line: 20, col: 8, offset: 248},
 				run: (*parser).callonCall1,
 				expr: &seqExpr{
-					pos: position{line: 26, col: 8, offset: 412},
+					pos: position{line: 20, col: 8, offset: 248},
 					exprs: []interface{}{
 						&labeledExpr{
-							pos:   position{line: 26, col: 8, offset: 412},
+							pos:   position{line: 20, col: 8, offset: 248},
 							label: "name",
 							expr: &ruleRefExpr{
-								pos:  position{line: 26, col: 13, offset: 417},
+								pos:  position{line: 20, col: 13, offset: 253},
 								name: "Name",
 							},
 						},
 						&litMatcher{
-							pos:        position{line: 26, col: 18, offset: 422},
+							pos:        position{line: 20, col: 18, offset: 258},
 							val:        "(",
 							ignoreCase: false,
 						},
 						&labeledExpr{
-							pos:   position{line: 26, col: 22, offset: 426},
+							pos:   position{line: 20, col: 22, offset: 262},
 							label: "args",
 							expr: &ruleRefExpr{
-								pos:  position{line: 26, col: 27, offset: 431},
+								pos:  position{line: 20, col: 27, offset: 267},
 								name: "Arguments",
 							},
 						},
 						&litMatcher{
-							pos:        position{line: 26, col: 37, offset: 441},
+							pos:        position{line: 20, col: 37, offset: 277},
 							val:        ")",
 							ignoreCase: false,
 						},
 						&labeledExpr{
-							pos:   position{line: 26, col: 41, offset: 445},
+							pos:   position{line: 20, col: 41, offset: 281},
 							label: "fields",
 							expr: &zeroOrOneExpr{
-								pos: position{line: 26, col: 48, offset: 452},
+								pos: position{line: 20, col: 48, offset: 288},
 								expr: &ruleRefExpr{
-									pos:  position{line: 26, col: 48, offset: 452},
+									pos:  position{line: 20, col: 48, offset: 288},
 									name: "Fields",
 								},
 							},
@@ -108,14 +102,14 @@ var g = &grammar{
 		},
 		{
 			name: "Name",
-			pos:  position{line: 38, col: 1, offset: 703},
+			pos:  position{line: 32, col: 1, offset: 539},
 			expr: &actionExpr{
-				pos: position{line: 38, col: 8, offset: 712},
+				pos: position{line: 32, col: 8, offset: 548},
 				run: (*parser).callonName1,
 				expr: &oneOrMoreExpr{
-					pos: position{line: 38, col: 8, offset: 712},
+					pos: position{line: 32, col: 8, offset: 548},
 					expr: &ruleRefExpr{
-						pos:  position{line: 38, col: 8, offset: 712},
+						pos:  position{line: 32, col: 8, offset: 548},
 						name: "alphaNum",
 					},
 				},
@@ -123,34 +117,34 @@ var g = &grammar{
 		},
 		{
 			name: "Arguments",
-			pos:  position{line: 42, col: 1, offset: 758},
+			pos:  position{line: 36, col: 1, offset: 594},
 			expr: &actionExpr{
-				pos: position{line: 42, col: 13, offset: 772},
+				pos: position{line: 36, col: 13, offset: 608},
 				run: (*parser).callonArguments1,
 				expr: &labeledExpr{
-					pos:   position{line: 42, col: 13, offset: 772},
+					pos:   position{line: 36, col: 13, offset: 608},
 					label: "args",
 					expr: &zeroOrOneExpr{
-						pos: position{line: 42, col: 18, offset: 777},
+						pos: position{line: 36, col: 18, offset: 613},
 						expr: &seqExpr{
-							pos: position{line: 42, col: 19, offset: 778},
+							pos: position{line: 36, col: 19, offset: 614},
 							exprs: []interface{}{
 								&ruleRefExpr{
-									pos:  position{line: 42, col: 19, offset: 778},
+									pos:  position{line: 36, col: 19, offset: 614},
 									name: "argument",
 								},
 								&zeroOrMoreExpr{
-									pos: position{line: 42, col: 28, offset: 787},
+									pos: position{line: 36, col: 28, offset: 623},
 									expr: &seqExpr{
-										pos: position{line: 42, col: 29, offset: 788},
+										pos: position{line: 36, col: 29, offset: 624},
 										exprs: []interface{}{
 											&litMatcher{
-												pos:        position{line: 42, col: 29, offset: 788},
+												pos:        position{line: 36, col: 29, offset: 624},
 												val:        ",",
 												ignoreCase: false,
 											},
 											&ruleRefExpr{
-												pos:  position{line: 42, col: 33, offset: 792},
+												pos:  position{line: 36, col: 33, offset: 628},
 												name: "argument",
 											},
 										},
@@ -164,14 +158,14 @@ var g = &grammar{
 		},
 		{
 			name: "argument",
-			pos:  position{line: 56, col: 1, offset: 1144},
+			pos:  position{line: 50, col: 1, offset: 980},
 			expr: &actionExpr{
-				pos: position{line: 56, col: 12, offset: 1157},
+				pos: position{line: 50, col: 12, offset: 993},
 				run: (*parser).callonargument1,
 				expr: &oneOrMoreExpr{
-					pos: position{line: 56, col: 12, offset: 1157},
+					pos: position{line: 50, col: 12, offset: 993},
 					expr: &ruleRefExpr{
-						pos:  position{line: 56, col: 12, offset: 1157},
+						pos:  position{line: 50, col: 12, offset: 993},
 						name: "alphaNum",
 					},
 				},
@@ -179,42 +173,42 @@ var g = &grammar{
 		},
 		{
 			name: "Fields",
-			pos:  position{line: 60, col: 1, offset: 1213},
+			pos:  position{line: 54, col: 1, offset: 1049},
 			expr: &actionExpr{
-				pos: position{line: 60, col: 10, offset: 1224},
+				pos: position{line: 54, col: 10, offset: 1060},
 				run: (*parser).callonFields1,
 				expr: &seqExpr{
-					pos: position{line: 60, col: 10, offset: 1224},
+					pos: position{line: 54, col: 10, offset: 1060},
 					exprs: []interface{}{
 						&litMatcher{
-							pos:        position{line: 60, col: 10, offset: 1224},
+							pos:        position{line: 54, col: 10, offset: 1060},
 							val:        "{",
 							ignoreCase: false,
 						},
 						&labeledExpr{
-							pos:   position{line: 60, col: 14, offset: 1228},
+							pos:   position{line: 54, col: 14, offset: 1064},
 							label: "fields",
 							expr: &zeroOrOneExpr{
-								pos: position{line: 60, col: 21, offset: 1235},
+								pos: position{line: 54, col: 21, offset: 1071},
 								expr: &seqExpr{
-									pos: position{line: 60, col: 22, offset: 1236},
+									pos: position{line: 54, col: 22, offset: 1072},
 									exprs: []interface{}{
 										&ruleRefExpr{
-											pos:  position{line: 60, col: 22, offset: 1236},
+											pos:  position{line: 54, col: 22, offset: 1072},
 											name: "field",
 										},
 										&zeroOrMoreExpr{
-											pos: position{line: 60, col: 28, offset: 1242},
+											pos: position{line: 54, col: 28, offset: 1078},
 											expr: &seqExpr{
-												pos: position{line: 60, col: 29, offset: 1243},
+												pos: position{line: 54, col: 29, offset: 1079},
 												exprs: []interface{}{
 													&litMatcher{
-														pos:        position{line: 60, col: 29, offset: 1243},
+														pos:        position{line: 54, col: 29, offset: 1079},
 														val:        ",",
 														ignoreCase: false,
 													},
 													&ruleRefExpr{
-														pos:  position{line: 60, col: 33, offset: 1247},
+														pos:  position{line: 54, col: 33, offset: 1083},
 														name: "field",
 													},
 												},
@@ -225,7 +219,7 @@ var g = &grammar{
 							},
 						},
 						&litMatcher{
-							pos:        position{line: 60, col: 43, offset: 1257},
+							pos:        position{line: 54, col: 43, offset: 1093},
 							val:        "}",
 							ignoreCase: false,
 						},
@@ -234,23 +228,61 @@ var g = &grammar{
 			},
 		},
 		{
-			name: "field",
-			pos:  position{line: 74, col: 1, offset: 1609},
+			name: "FieldCall",
+			pos:  position{line: 68, col: 1, offset: 1445},
 			expr: &actionExpr{
-				pos: position{line: 74, col: 9, offset: 1619},
+				pos: position{line: 68, col: 13, offset: 1459},
+				run: (*parser).callonFieldCall1,
+				expr: &seqExpr{
+					pos: position{line: 68, col: 13, offset: 1459},
+					exprs: []interface{}{
+						&labeledExpr{
+							pos:   position{line: 68, col: 13, offset: 1459},
+							label: "field",
+							expr: &ruleRefExpr{
+								pos:  position{line: 68, col: 19, offset: 1465},
+								name: "Name",
+							},
+						},
+						&litMatcher{
+							pos:        position{line: 68, col: 24, offset: 1470},
+							val:        ".",
+							ignoreCase: false,
+						},
+						&labeledExpr{
+							pos:   position{line: 68, col: 28, offset: 1474},
+							label: "call",
+							expr: &ruleRefExpr{
+								pos:  position{line: 68, col: 33, offset: 1479},
+								name: "Call",
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "field",
+			pos:  position{line: 74, col: 1, offset: 1595},
+			expr: &actionExpr{
+				pos: position{line: 74, col: 9, offset: 1605},
 				run: (*parser).callonfield1,
 				expr: &labeledExpr{
-					pos:   position{line: 74, col: 9, offset: 1619},
+					pos:   position{line: 74, col: 9, offset: 1605},
 					label: "field",
 					expr: &choiceExpr{
-						pos: position{line: 74, col: 16, offset: 1626},
+						pos: position{line: 74, col: 16, offset: 1612},
 						alternatives: []interface{}{
 							&ruleRefExpr{
-								pos:  position{line: 74, col: 16, offset: 1626},
+								pos:  position{line: 74, col: 16, offset: 1612},
+								name: "FieldCall",
+							},
+							&ruleRefExpr{
+								pos:  position{line: 74, col: 28, offset: 1624},
 								name: "Name",
 							},
 							&ruleRefExpr{
-								pos:  position{line: 74, col: 23, offset: 1633},
+								pos:  position{line: 74, col: 35, offset: 1631},
 								name: "Fields",
 							},
 						},
@@ -260,9 +292,9 @@ var g = &grammar{
 		},
 		{
 			name: "alphaNum",
-			pos:  position{line: 85, col: 1, offset: 1883},
+			pos:  position{line: 87, col: 1, offset: 1947},
 			expr: &charClassMatcher{
-				pos:        position{line: 85, col: 12, offset: 1896},
+				pos:        position{line: 87, col: 12, offset: 1960},
 				val:        "[a-z0-9_]i",
 				chars:      []rune{'_'},
 				ranges:     []rune{'a', 'z', '0', '9'},
@@ -272,11 +304,11 @@ var g = &grammar{
 		},
 		{
 			name: "EOF",
-			pos:  position{line: 87, col: 1, offset: 1908},
+			pos:  position{line: 89, col: 1, offset: 1972},
 			expr: &notExpr{
-				pos: position{line: 87, col: 7, offset: 1916},
+				pos: position{line: 89, col: 7, offset: 1980},
 				expr: &anyMatcher{
-					line: 87, col: 8, offset: 1917,
+					line: 89, col: 8, offset: 1981,
 				},
 			},
 		},
@@ -371,12 +403,26 @@ func (p *parser) callonFields1() (interface{}, error) {
 	return p.cur.onFields1(stack["fields"])
 }
 
+func (c *current) onFieldCall1(field, call interface{}) (interface{}, error) {
+	callV := call.(graphql.Call)
+	callV.Name = field.(string) + "." + callV.Name
+	return callV, nil
+}
+
+func (p *parser) callonFieldCall1() (interface{}, error) {
+	stack := p.vstack[len(p.vstack)-1]
+	_ = stack
+	return p.cur.onFieldCall1(stack["field"], stack["call"])
+}
+
 func (c *current) onfield1(field interface{}) (interface{}, error) {
 	switch f := field.(type) {
 	case string:
 		return graphql.Field{Name: f}, nil
 	case graphql.Fields:
 		return graphql.Field{Fields: f}, nil
+	case graphql.Call:
+		return graphql.Field{Call: f}, nil
 	default:
 		return nil, fmt.Errorf("unexpected type: %#v", f)
 	}

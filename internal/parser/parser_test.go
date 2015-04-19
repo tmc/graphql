@@ -12,6 +12,7 @@ var shouldParse = []string{
 	`foo(){id}`,
 	`foo(1,2){id}`,
 	`foo(1,2){id,{nest,some,{fields}}}`,
+	`node(42){id,friends.top(10)}`,
 }
 
 func TestSuccessfulParses(t *testing.T) {
