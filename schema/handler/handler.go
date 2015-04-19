@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"errors"
 	"io"
 	"net/http"
 
@@ -11,23 +10,23 @@ import (
 	"github.com/tmc/graphql/schema"
 )
 
-var (
-	ErrMalformedQuery = errors.New("malformed query")
-)
-
+// Error represents an error the occured while parsing a graphql query or while generating a response.
 type Error struct {
 	Message string `json:"message"`
 }
 
+// Result represents a graphql query result.
 type Result struct {
 	Data  interface{} `json:"data,omitempty"`
 	Error *Error      `json:"error,omitempty"`
 }
 
+// SchemaHandler makes a schema.Schema querable via HTTP
 type SchemaHandler struct {
 	schema *schema.Schema
 }
 
+// New constructs a SchemaHandler from a schema.
 func New(schema *schema.Schema) *SchemaHandler {
 	return &SchemaHandler{schema: schema}
 }

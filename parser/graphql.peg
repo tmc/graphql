@@ -1,7 +1,5 @@
 {
-/* GraphQL-ish PEG grammar
-
-This implements a parser for a restricted subset of GraphQL
+/*Package parser implements an experimental PEG grammar for a subset of GraphQL.
 
 Limitations:
  - does not support named queries

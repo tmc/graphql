@@ -7,17 +7,21 @@ import (
 	"github.com/tmc/graphql"
 )
 
+// Schema represents the registered types that know how to respond to root calls.
 type Schema struct {
 	registeredTypes []GraphQLType
 	rootCalls       map[string]CallHandler
 }
 
+// CallHandler is the type that can generate a response from a graphql Call.
 type CallHandler func(graphql.Call) (interface{}, error)
 
+// GraphQLType is the interface that root call providers conform to.
 type GraphQLType interface {
 	RootCalls() map[string]CallHandler
 }
 
+// New prepares a new Schema.
 func New() *Schema {
 	s := &Schema{
 		registeredTypes: []GraphQLType{},
@@ -28,6 +32,7 @@ func New() *Schema {
 	return s
 }
 
+// HandleCall dispatches a graphql.Call the the appropriate registered type.
 func (s *Schema) HandleCall(c graphql.Call) (interface{}, error) {
 	handler, ok := s.rootCalls[c.Name]
 	if !ok {
@@ -36,6 +41,7 @@ func (s *Schema) HandleCall(c graphql.Call) (interface{}, error) {
 	return handler(c)
 }
 
+// Register registers a new type that provides root calls.
 func (s *Schema) Register(t GraphQLType) {
 	s.registeredTypes = append(s.registeredTypes, t)
 	for call, handler := range t.RootCalls() {
@@ -44,6 +50,7 @@ func (s *Schema) Register(t GraphQLType) {
 	}
 }
 
+// RootCalls returns the root call that Schema itself provides.
 func (s *Schema) RootCalls() map[string]CallHandler {
 	return map[string]CallHandler{
 		"schema": s.handleSchemaCall,
