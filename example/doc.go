@@ -1,2 +1,2 @@
-// Package examples contains usage examples.
+// Package example contains usage examples.
 package example
