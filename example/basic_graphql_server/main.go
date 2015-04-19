@@ -1,4 +1,12 @@
 // Program basic_graphql_server shows a simple HTTP server that exposes a bare schema.
+//
+// Example:
+//  $ go get github.com/tmc/graphql/example/basic_graphql_server
+//  $ basic_graphql_server &
+//  $ curl 'http://localhost:8080/?q=schema()\{root_calls\}'
+//  {"data":{"root_calls":["schema"]}}
+//
+// Here we see the server showing the available root calls ("schema").
 package main
 
 import (
