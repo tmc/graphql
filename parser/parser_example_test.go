@@ -10,7 +10,7 @@ import (
 const exampleQuery = `node(42){id,answer,{towel,planet}}`
 
 func ExampleParse() {
-	result, err := parser.Parse("example.graphql", []byte(exampleQuery))
+	result, err := parser.Parse([]byte(exampleQuery))
 	if err != nil {
 		fmt.Println("err:", err)
 	}

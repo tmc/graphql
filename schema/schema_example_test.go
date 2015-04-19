@@ -12,11 +12,11 @@ import (
 
 func ExampleSchema() {
 	s := schema.New()
-	call, err := parser.Parse("schema_test.go", []byte(`schema(){root_calls}`))
+	call, err := parser.Parse([]byte(`schema(){root_calls}`))
 	if err != nil {
 		fmt.Println(err)
 	}
-	result, err := s.HandleCall(call.(graphql.Call))
+	result, err := s.HandleCall(call)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -45,11 +45,11 @@ func (n *nowProvider) RootCalls() map[string]schema.CallHandler {
 func ExampleSchemaCustomType() {
 	s := schema.New()
 	s.Register(new(nowProvider))
-	call, err := parser.Parse("schema_test.go", []byte(`schema(){root_calls}`))
+	call, err := parser.Parse([]byte(`schema(){root_calls}`))
 	if err != nil {
 		fmt.Println(err)
 	}
-	result, err := s.HandleCall(call.(graphql.Call))
+	result, err := s.HandleCall(call)
 	if err != nil {
 		fmt.Println(err)
 	}

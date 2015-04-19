@@ -3,7 +3,7 @@ package parser_test
 import (
 	"testing"
 
-	"github.com/tmc/graphql/parser"
+	"github.com/tmc/graphql/internal/parser"
 )
 
 var shouldParse = []string{

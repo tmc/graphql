@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/tmc/graphql"
 	"github.com/tmc/graphql/parser"
 	"github.com/tmc/graphql/schema"
 )
@@ -43,13 +42,12 @@ func writeJSON(w io.Writer, data interface{}) {
 func (h *SchemaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	//TODO(tmc): reject non-GET requests
 	q := r.URL.Query().Get("q")
-	result, err := parser.Parse("", []byte(q))
+	call, err := parser.Parse([]byte(q))
 	if err != nil {
 		writeErr(w, err)
 		return
 	}
-	call := result.(graphql.Call)
-	result, err = h.schema.HandleCall(call)
+	result, err := h.schema.HandleCall(call)
 	if err != nil {
 		writeErr(w, err)
 		return
