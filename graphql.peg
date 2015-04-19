@@ -1,10 +1,4 @@
 {
-/*Package parser implements an experimental PEG grammar for a subset of GraphQL.
-
-Limitations:
- - does not support named queries
- - does not support field calls
-*/
 package parser
 
 import "github.com/tmc/graphql"
