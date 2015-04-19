@@ -1,4 +1,4 @@
-// Program basic shows a simple HTTP server that exposes a bare schema.
+// Program basic_graphql_server shows a simple HTTP server that exposes a bare schema.
 package main
 
 import (
