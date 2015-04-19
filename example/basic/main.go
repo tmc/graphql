@@ -1,3 +1,4 @@
+// Program basic shows a simple HTTP server that exposes a bare schema.
 package main
 
 import (
