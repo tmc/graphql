@@ -21,7 +21,7 @@ type Fields []Field
 
 // Field represents a named field, a field call, or a set of Fields for a sub-object.
 type Field struct {
-	Call   Call   `json:",omitempty"`
+	Call   *Call  `json:",omitempty"`
 	Name   string `json:",omitempty"`
 	Fields Fields `json:",omitempty"`
 }

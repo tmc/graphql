@@ -263,26 +263,26 @@ var g = &grammar{
 		},
 		{
 			name: "field",
-			pos:  position{line: 74, col: 1, offset: 1595},
+			pos:  position{line: 73, col: 1, offset: 1588},
 			expr: &actionExpr{
-				pos: position{line: 74, col: 9, offset: 1605},
+				pos: position{line: 73, col: 9, offset: 1598},
 				run: (*parser).callonfield1,
 				expr: &labeledExpr{
-					pos:   position{line: 74, col: 9, offset: 1605},
+					pos:   position{line: 73, col: 9, offset: 1598},
 					label: "field",
 					expr: &choiceExpr{
-						pos: position{line: 74, col: 16, offset: 1612},
+						pos: position{line: 73, col: 16, offset: 1605},
 						alternatives: []interface{}{
 							&ruleRefExpr{
-								pos:  position{line: 74, col: 16, offset: 1612},
+								pos:  position{line: 73, col: 16, offset: 1605},
 								name: "FieldCall",
 							},
 							&ruleRefExpr{
-								pos:  position{line: 74, col: 28, offset: 1624},
+								pos:  position{line: 73, col: 28, offset: 1617},
 								name: "Name",
 							},
 							&ruleRefExpr{
-								pos:  position{line: 74, col: 35, offset: 1631},
+								pos:  position{line: 73, col: 35, offset: 1624},
 								name: "Fields",
 							},
 						},
@@ -292,9 +292,9 @@ var g = &grammar{
 		},
 		{
 			name: "alphaNum",
-			pos:  position{line: 87, col: 1, offset: 1947},
+			pos:  position{line: 86, col: 1, offset: 1920},
 			expr: &charClassMatcher{
-				pos:        position{line: 87, col: 12, offset: 1960},
+				pos:        position{line: 86, col: 12, offset: 1933},
 				val:        "[a-z0-9_]i",
 				chars:      []rune{'_'},
 				ranges:     []rune{'a', 'z', '0', '9'},
@@ -304,11 +304,11 @@ var g = &grammar{
 		},
 		{
 			name: "EOF",
-			pos:  position{line: 89, col: 1, offset: 1972},
+			pos:  position{line: 88, col: 1, offset: 1945},
 			expr: &notExpr{
-				pos: position{line: 89, col: 7, offset: 1980},
+				pos: position{line: 88, col: 7, offset: 1953},
 				expr: &anyMatcher{
-					line: 89, col: 8, offset: 1981,
+					line: 88, col: 8, offset: 1954,
 				},
 			},
 		},
@@ -405,8 +405,7 @@ func (p *parser) callonFields1() (interface{}, error) {
 
 func (c *current) onFieldCall1(field, call interface{}) (interface{}, error) {
 	callV := call.(graphql.Call)
-	callV.Name = field.(string) + "." + callV.Name
-	return callV, nil
+	return graphql.Field{Name: field.(string), Call: &callV}, nil
 }
 
 func (p *parser) callonFieldCall1() (interface{}, error) {
@@ -421,8 +420,8 @@ func (c *current) onfield1(field interface{}) (interface{}, error) {
 		return graphql.Field{Name: f}, nil
 	case graphql.Fields:
 		return graphql.Field{Fields: f}, nil
-	case graphql.Call:
-		return graphql.Field{Call: f}, nil
+	case graphql.Field:
+		return f, nil
 	default:
 		return nil, fmt.Errorf("unexpected type: %#v", f)
 	}
