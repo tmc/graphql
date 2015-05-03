@@ -13,11 +13,15 @@ func ifs(v interface{}) []interface{} {
 }
 }
 
-Query ← call:Call EOF {
+Query ← call:(wrappedCall / Call) _ EOF {
     return call, nil
 }
 
-Call ← name:Name '(' args:Arguments ')' fields:Fields? {
+wrappedCall ← _ '{' _ call:Call _ '}' {
+    return call, nil
+}
+
+Call ← _ name:Name _ '(' _ args:Arguments _ ')' _ fields:Fields? {
     fieldsV := graphql.Fields{}
     if fields != nil {
         fieldsV = fields.(graphql.Fields)
@@ -47,8 +51,19 @@ Arguments ← args:(argument (',' argument)*)? {
     return result, nil
 }
 
-argument ← alphaNum+ {
-    return graphql.Argument(c.text), nil
+argumentName ← name:Name _ ':' {
+    if name == nil {
+        return "", nil
+    }
+    return name.(string), nil
+}
+
+argument ← _ argName:argumentName? _ argValue:Name _ {
+    name, _ := argName.(string)
+    return graphql.Argument{
+        Name: name,
+        Value: argValue.(string),
+    }, nil
 }
 
 Fields ← '{' fields:(field (',' field)*)? '}' {
@@ -70,7 +85,7 @@ FieldCall ← field:Name '.' call:Call {
     return graphql.Field{Name: field.(string), Call: &callV}, nil
 }
 
-field ← field:(FieldCall / Name / Fields) {
+field ← _ field:(FieldCall / Call / Name / Fields) _ {
     switch f := field.(type) {
     case string:
         return graphql.Field{Name:f}, nil
@@ -78,11 +93,15 @@ field ← field:(FieldCall / Name / Fields) {
         return graphql.Field{Fields: f}, nil
     case graphql.Field:
         return f, nil
+    case graphql.Call:
+        return graphql.Field{Call: &f}, nil
     default:
         return nil, fmt.Errorf("unexpected type: %#v", f)
     }
 }
 
 alphaNum ← [a-z0-9_]i
+
+_ "whitespace" ← [ \n\t\r]*
 
 EOF ← !.

@@ -8,11 +8,26 @@ import (
 
 var shouldParse = []string{
 	`foo()`,
-	`node(42)`,
+	`{foo()}`,
+	`node(id:42)`,
 	`foo(){id}`,
-	`foo(1,2){id}`,
-	`foo(1,2){id,{nest,some,{fields}}}`,
-	`node(42){id,friends.top(10)}`,
+	`foo(id1:1,id2:2){id}`,
+	`foo(id2:1,id2:2){id,{nest,some,{fields}}}`,
+	`node(id:42){id,friends.top(10)}`,
+	`node(id:42) { id , friends.top(10) }`,
+	`{
+	  user(id: 3500401) {
+	    id,
+	    name,
+	    isViewerFriend,
+	    profilePicture(size: 50)  {
+	      uri,
+	      width,
+	      height
+	    }
+	  }
+	}
+	`,
 }
 
 func TestSuccessfulParses(t *testing.T) {

@@ -7,7 +7,7 @@ import (
 	"github.com/tmc/graphql/parser"
 )
 
-const exampleQuery = `node(42){id,answer,{towel,planet}}`
+const exampleQuery = `{node(id:42){id,answer,{towel,planet}}}`
 
 func ExampleParse() {
 	result, err := parser.Parse([]byte(exampleQuery))
@@ -17,10 +17,13 @@ func ExampleParse() {
 	asjson, _ := json.MarshalIndent(result, "", " ")
 	fmt.Println(string(asjson))
 	// output:
-	//  {
+	// {
 	//  "Name": "node",
 	//  "Arguments": [
-	//   "42"
+	//   {
+	//    "Name": "id",
+	//    "Value": "42"
+	//   }
 	//  ],
 	//  "Fields": [
 	//   {

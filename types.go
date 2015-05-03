@@ -11,7 +11,10 @@ type Call struct {
 }
 
 // Argument is an argument to a Call
-type Argument string
+type Argument struct {
+	Name  string
+	Value string
+}
 
 // Arguments is a collection of Argument values
 type Arguments []Argument
