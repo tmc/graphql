@@ -1,107 +1,87 @@
 {
 package parser
-
-import "github.com/tmc/graphql"
-
-// helper functions
-
-func ifs(v interface{}) []interface{} {
-    if v == nil {
-        return nil
-    }
-    return v.([]interface{})
-}
 }
 
-Query ← call:(wrappedCall / Call) _ EOF {
-    return call, nil
-}
+Document ← Statement+
 
-wrappedCall ← _ '{' _ call:Call _ '}' {
-    return call, nil
-}
+Statement ← Operation / FragmentDefinition / TypeDefinition / TypeExtension / EnumDefinition / Comment
 
-Call ← _ name:Name _ '(' _ args:Arguments _ ')' _ fields:Fields? {
-    fieldsV := graphql.Fields{}
-    if fields != nil {
-        fieldsV = fields.(graphql.Fields)
-    }
-    return graphql.Call{
-        Name: name.(string),
-        Arguments: args.(graphql.Arguments),
-        Fields: fieldsV,
-    }, nil
-}
+Comment ← '#' [^\n]*
 
-Name ← alphaNum+ {
-    return string(c.text), nil
-}
+Operation ← Selections /
+            (OperationType _ OperationName _ VariableDefinitions? _ Directives? _ Selections)
 
-Arguments ← args:(argument (',' argument)*)? {
-    result := graphql.Arguments{}
-    argsV := ifs(args)
-    if len(argsV) == 0 {
-        return result, nil
-    }
-    result = append(result, argsV[0].(graphql.Argument))
-    for _, arg := range ifs(argsV[1]) {
-        argSlice := ifs(arg)
-        result = append(result, argSlice[1].(graphql.Argument))
-    }
-    return result, nil
-}
+OperationType ← "query" / "mutation"
+OperationName ← Name
+VariableDefinitions ← '(' VariableDefinition+ ')'
+VariableDefinition ← _ Variable _ ':' _ Type _ DefaultValue? _
+DefaultValue ← '=' Value
 
-argumentName ← name:Name _ ':' {
-    if name == nil {
-        return "", nil
-    }
-    return name.(string), nil
-}
+Selections ← '{' Selection+ '}'
+Selection ← _ Field _ / _ FragmentSpread _
 
-argument ← _ argName:argumentName? _ argValue:Name _ {
-    name, _ := argName.(string)
-    return graphql.Argument{
-        Name: name,
-        Value: argValue.(string),
-    }, nil
-}
+Field ← FieldAlias? _ FieldName _ Arguments? _ Directives? _ Selections?
+FieldAlias ← Name ':'
+FieldName ← Name
+Arguments ← '(' Argument* ')'
+Argument ← _ ArgumentName _ ':' _ Value _
+ArgumentName ← Name
 
-Fields ← '{' fields:(field (',' field)*)? '}' {
-    result := graphql.Fields{}
-    fieldsV := ifs(fields)
-    if len(fieldsV) == 0 {
-        return result, nil
-    }
-    result = append(result, fieldsV[0].(graphql.Field))
-    for _, field := range ifs(fieldsV[1]) {
-        fieldSlice := ifs(field)
-        result = append(result, fieldSlice[1].(graphql.Field))
-    }
-    return result, nil
-}
+Name ← [a-z_]i [0-9a-z_]i*
 
-FieldCall ← field:Name '.' call:Call {
-    callV := call.(graphql.Call)
-    return graphql.Field{Name: field.(string), Call: &callV}, nil
-}
+FragmentSpread ←  "..." FragmentName Directives?
+FragmentDefinition ← "fragment" Type FragmentName Directives? Selections
+FragmentName ← Name
 
-field ← _ field:(FieldCall / Call / Name / Fields) _ {
-    switch f := field.(type) {
-    case string:
-        return graphql.Field{Name:f}, nil
-    case graphql.Fields:
-        return graphql.Field{Fields: f}, nil
-    case graphql.Field:
-        return f, nil
-    case graphql.Call:
-        return graphql.Field{Call: &f}, nil
-    default:
-        return nil, fmt.Errorf("unexpected type: %#v", f)
-    }
-}
+Value ← _ (Null / Boolean / Int / Float / String / Array / Object / Variable) _
+// TODO(tmc) Value_variable, Value_qualifyEnum
 
-alphaNum ← [a-z0-9_]i
+Null ← "null"
+Boolean ← "true" / "false"
+Int ← Sign? IntegerPart
+Float ← Sign? IntegerPart '.' Digit+ ExponentPart?
+Sign ← '-'
+IntegerPart ← '0' / NonZeroDigit Digit*
+ExponentPart ← 'e' Sign? Digit+
+Digit ← [0-9]
+NonZeroDigit ← [123456789]
+String ← '"' StringCharacter* '"'
+StringCharacter ← [^\\"] / '\\' EscapedCharacter / '\\' EscapedUnicode
+EscapedUnicode ← 'u' [0-9a-f]i [0-9a-f]i [0-9a-f]i [0-9a-f]i
+EscapedCharacter ← ["/bfnrt] / '\\'
+ 
+Array ← '[' Value* ']'
+Object ← '{' Property+ '}'
 
-_ "whitespace" ← [ \n\t\r]*
+Variable ← VariableName
+// TODO(tmc): the above should be: Variable ← VariableName / VariablePropertySelection
+VariableName ← '$' [0-9a-z_]i+
+VariablePropertySelection ← Variable '.' PropertyName
+
+Property ← PropertyName ':' Value
+PropertyName ← Name
+
+Directives ← Directive+
+Directive ← _ '@' (DirectiveName ':' _ Value /
+	               DirectiveName ':' _ Type /
+                   DirectiveName) _
+DirectiveName ← Name
+
+Type ← OptionalType / GenericType
+OptionalType ← GenericType?
+GenericType ← TypeName TypeParams?
+TypeParams ← ':' '<' Type+ '>'
+TypeName ← Name
+TypeDefinition ← "type" _ TypeName _ Interfaces? _ '{' FieldDefinition+ '}'
+TypeExtension ← "extend" _ TypeName _ Interfaces? _ '{' FieldDefinition+ '}'
+Interfaces ← GenericType+
+FieldDefinition ← _ FieldName _ ArgumentDefinitions? _ ':' _ Type _
+ArgumentDefinitions ← '(' ArgumentDefinition+ ')'
+ArgumentDefinition ← _ ArgumentName _ ':' _ Type _ DefaultValue? _
+EnumDefinition ← "enum" TypeName '{' EnumValueName+ '}'
+EnumValueName ← Name
+
+_ "ignored" ← (whitespace / Comment / ',')*
+whitespace ← [ \n\t\r]+
 
 EOF ← !.

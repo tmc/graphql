@@ -12,7 +12,7 @@ import (
 
 func ExampleSchema() {
 	s := schema.New()
-	call, err := parser.Parse([]byte(`schema(){root_calls}`))
+	call, err := parser.ParseOperation([]byte(`schema(){root_calls}`))
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -32,7 +32,7 @@ func ExampleSchema() {
 
 type nowProvider struct{}
 
-func (n *nowProvider) now(c graphql.Call) (interface{}, error) {
+func (n *nowProvider) now(c graphql.Operation) (interface{}, error) {
 	return time.Now(), nil
 }
 
@@ -45,7 +45,7 @@ func (n *nowProvider) RootCalls() map[string]schema.CallHandler {
 func ExampleSchemaCustomType() {
 	s := schema.New()
 	s.Register(new(nowProvider))
-	call, err := parser.Parse([]byte(`schema(){root_calls}`))
+	call, err := parser.ParseOperation([]byte(`schema(){root_calls}`))
 	if err != nil {
 		fmt.Println(err)
 	}

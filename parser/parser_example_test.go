@@ -7,10 +7,18 @@ import (
 	"github.com/tmc/graphql/parser"
 )
 
-const exampleQuery = `{node(id:42){id,answer,{towel,planet}}}`
+const exampleQuery = `{
+  user(id: 42) {
+	friends(isViewerFriend: true, first: 10) {
+	  nodes {
+		name
+	  }
+	}
+  }
+}`
 
 func ExampleParse() {
-	result, err := parser.Parse([]byte(exampleQuery))
+	result, err := parser.ParseOperation([]byte(exampleQuery))
 	if err != nil {
 		fmt.Println("err:", err)
 	}

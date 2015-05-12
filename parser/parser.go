@@ -8,16 +8,16 @@ import (
 )
 
 var (
-	// ErrMalformedQuery means there was a parsing error with the provided query
-	ErrMalformedQuery = errors.New("parser: malformed graphql query")
+	// ErrMalformedOperation means there was a parsing error with the provided query
+	ErrMalformedOperation = errors.New("parser: malformed graphql operation")
 )
 
-// Parse attempts to parse a graphql.Call from a byte slice.
-func Parse(query []byte) (graphql.Call, error) {
+// ParseOperation attempts to parse a graphql.Operation from a byte slice.
+func ParseOperation(query []byte) (graphql.Operation, error) {
 	result, err := parser.Parse("", query)
 	if err != nil {
-		return graphql.Call{}, ErrMalformedQuery
+		return graphql.Operation{}, ErrMalformedOperation
 	}
-	return result.(graphql.Call), nil
+	return result.(graphql.Operation), nil
 
 }
