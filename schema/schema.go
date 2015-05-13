@@ -10,35 +10,35 @@ import (
 // Schema represents the registered types that know how to respond to root calls.
 type Schema struct {
 	registeredTypes []GraphQLType
-	rootCalls       map[string]CallHandler
+	rootCalls       map[string]FieldHandler
 }
 
-// CallHandler is the type that can generate a response from a graphql Operation.
-type CallHandler func(graphql.Operation) (interface{}, error)
+// FieldHandler is the type that can generate a response from a graphql.Field.
+type FieldHandler func(*graphql.Field) (interface{}, error)
 
 // GraphQLType is the interface that root call providers conform to.
 type GraphQLType interface {
-	RootCalls() map[string]CallHandler
+	RootCalls() map[string]FieldHandler
 }
 
 // New prepares a new Schema.
 func New() *Schema {
 	s := &Schema{
 		registeredTypes: []GraphQLType{},
-		rootCalls:       map[string]CallHandler{},
+		rootCalls:       map[string]FieldHandler{},
 	}
 	// self-register
 	s.Register(s)
 	return s
 }
 
-// HandleCall dispatches a graphql.Operation to the appropriate registered type.
-func (s *Schema) HandleCall(c graphql.Operation) (interface{}, error) {
-	handler, ok := s.rootCalls[c.Name]
+// HandleField dispatches a graphql.Field to the appropriate registered type.
+func (s *Schema) HandleField(f *graphql.Field) (interface{}, error) {
+	handler, ok := s.rootCalls[f.Name]
 	if !ok {
-		return nil, fmt.Errorf("schema: no registered types handle the root call '%s'", c.Name)
+		return nil, fmt.Errorf("schema: no registered types handle the root call '%s'", f.Name)
 	}
-	return handler(c)
+	return handler(f)
 }
 
 // Register registers a new type that provides root calls.
@@ -51,17 +51,17 @@ func (s *Schema) Register(t GraphQLType) {
 }
 
 // RootCalls returns the root call that Schema itself provides.
-func (s *Schema) RootCalls() map[string]CallHandler {
-	return map[string]CallHandler{
+func (s *Schema) RootCalls() map[string]FieldHandler {
+	return map[string]FieldHandler{
 		"schema": s.handleSchemaCall,
 	}
 }
 
-func (s *Schema) handleSchemaCall(c graphql.Operation) (interface{}, error) {
+func (s *Schema) handleSchemaCall(f *graphql.Field) (interface{}, error) {
 	result := map[string]interface{}{}
 	rootCalls := []string{}
-	for _, selection := range c.Selections {
-		if selection.FieldName == "root_calls" {
+	for _, selection := range f.Selections {
+		if selection.Field.Name == "root_calls" {
 			for rootCall := range s.rootCalls {
 				rootCalls = append(rootCalls, rootCall)
 			}

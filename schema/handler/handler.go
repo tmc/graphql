@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -42,15 +43,21 @@ func writeJSON(w io.Writer, data interface{}) {
 func (h *SchemaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	//TODO(tmc): reject non-GET requests
 	q := r.URL.Query().Get("q")
-	call, err := parser.ParseOperation([]byte(q))
+	operation, err := parser.ParseOperation([]byte(q))
 	if err != nil {
 		writeErr(w, err)
 		return
 	}
-	result, err := h.schema.HandleCall(call)
-	if err != nil {
-		writeErr(w, err)
-		return
+	for _, s := range operation.Selections {
+		if s.FragmentSpread != nil {
+			writeErr(w, fmt.Errorf("FragmentSpread not yet supported"))
+			continue
+		}
+		result, err := h.schema.HandleField(s.Field)
+		if err != nil {
+			writeErr(w, err)
+		} else {
+			writeJSON(w, Result{Data: result})
+		}
 	}
-	writeJSON(w, Result{Data: result})
 }

@@ -1,87 +1,378 @@
 {
 package parser
+
+import "github.com/tmc/graphql"
+
+// helpers
+func ifs(v interface{}) []interface{} {
+    if v == nil {
+        return nil
+    }
+    return v.([]interface{})
+}
 }
 
-Document ← Statement+
+Document ← stmts:Statement+ EOF {
+	result := graphql.Document{
+		Operations: []graphql.Operation{},
+	}
+	sl := ifs(stmts)
+	for _, s := range sl {
+		if s == nil {
+			continue
+		}
+		if op, ok := s.(graphql.Operation); ok {
+			result.Operations = append(result.Operations, op)
+		} else if fragDef, ok := s.(graphql.FragmentDefinition); ok {
+			result.FragmentDefinitions = append(result.FragmentDefinitions, fragDef)
+		} else if typeDef, ok := s.(graphql.TypeDefinition); ok {
+			result.TypeDefinitions = append(result.TypeDefinitions, typeDef)
+		} else if typeExt, ok := s.(graphql.TypeExtension); ok {
+			result.TypeExtensions = append(result.TypeExtensions, typeExt)
+		} else if enumDef, ok := s.(graphql.EnumDefinition); ok {
+			result.EnumDefinitions = append(result.EnumDefinitions, enumDef)
+		} else {
+			return result, fmt.Errorf("unhandled statement type: %#v", s)
+		}
+	}
+	return result, nil
+}
 
-Statement ← Operation / FragmentDefinition / TypeDefinition / TypeExtension / EnumDefinition / Comment
+Statement ← _ s:(Operation / FragmentDefinition / TypeDefinition / TypeExtension / EnumDefinition / Comment) _ {
+	return s, nil
+}
 
-Comment ← '#' [^\n]*
+Comment ← '#' [^\n]* { return string(c.text), nil }
 
-Operation ← Selections /
-            (OperationType _ OperationName _ VariableDefinitions? _ Directives? _ Selections)
+Operation ← sels:Selections {
+	return graphql.Operation{
+		Type: graphql.OperationQuery,
+		Selections: sels.([]graphql.Selection),
+	}, nil
 
-OperationType ← "query" / "mutation"
-OperationName ← Name
-VariableDefinitions ← '(' VariableDefinition+ ')'
-VariableDefinition ← _ Variable _ ':' _ Type _ DefaultValue? _
-DefaultValue ← '=' Value
+} /
+            (ot:OperationType _ on:OperationName _ vds:VariableDefinitions? _ ds:Directives? _ sels:Selections) {
+	var (
+		varDefs []graphql.VariableDefinition
+		directives []graphql.Directive
+	)
+	if vds != nil {
+		varDefs = vds.([]graphql.VariableDefinition)
+	}
+	if ds != nil {
+		directives = ds.([]graphql.Directive)
+	}
+	return graphql.Operation{
+		Type: ot.(graphql.OperationType),
+		Name: on.(string),
+		Selections: sels.([]graphql.Selection),
+		Directives: directives,
+		VariableDefinitions: varDefs,
+	},nil
+}
 
-Selections ← '{' Selection+ '}'
-Selection ← _ Field _ / _ FragmentSpread _
+OperationType ← "query" { return graphql.OperationQuery, nil }
+               / "mutation" { return graphql.OperationMutation, nil }
+OperationName ← Name {
+	return string(c.text), nil
+}
+VariableDefinitions ← '(' vds:VariableDefinition+ ')' {
+	result := []graphql.VariableDefinition{}
+	for _, d := range ifs(vds) {
+		result = append(result, d.(graphql.VariableDefinition))
+	}
+	return result, nil
+}
+VariableDefinition ← _ v:Variable _ ':' _ t:Type _ d:DefaultValue? _ {
+	var defaultValue *graphql.Value
+	if d != nil {
+		v := d.(graphql.Value)
+		defaultValue = &v
+	}
+	return graphql.VariableDefinition{
+		Variable: v.(graphql.Variable),
+		Type: t.(graphql.Type),
+		DefaultValue: defaultValue,
+	}, nil
+}
+DefaultValue ← '=' v:Value { return v, nil }
 
-Field ← FieldAlias? _ FieldName _ Arguments? _ Directives? _ Selections?
+Selections ← '{' s:(Selection+) '}' {
+	result := []graphql.Selection{}
+	for _, sel := range ifs(s) {
+		if sel, ok := sel.(graphql.Selection); ok {
+			result = append(result, sel)
+		} else {
+			return result, fmt.Errorf("got unexpected (non-statement) type: %#v", sel)
+		}
+	}
+	return result, nil
+}
+Selection ← (_ f:Field _) {
+	field := f.(graphql.Field)
+	return graphql.Selection{Field:&field}, nil
+} / (_ fs:FragmentSpread _) {
+	fragmentSpread := fs.(graphql.FragmentSpread)
+	return graphql.Selection{FragmentSpread:&fragmentSpread}, nil
+}
+
+Field ← fa:FieldAlias? _ fn:FieldName _ as:Arguments? _ ds:Directives? _ sels:Selections? {
+	var	(
+		selections []graphql.Selection
+		arguments []graphql.Argument
+		directives []graphql.Directive
+	)
+	if sels != nil {
+		selections = sels.([]graphql.Selection)
+	}
+	if as != nil {
+		arguments = as.([]graphql.Argument)
+	}
+	if ds != nil {
+		directives = ds.([]graphql.Directive)
+	}
+	return graphql.Field{
+		Name: fn.(string),
+		Arguments: arguments,
+		Selections: selections,
+		Directives: directives,
+	}, nil
+}
 FieldAlias ← Name ':'
 FieldName ← Name
-Arguments ← '(' Argument* ')'
-Argument ← _ ArgumentName _ ':' _ Value _
+Arguments ← '(' args:(Argument*) ')' {
+	results := []graphql.Argument{}
+	for _, a := range ifs(args) {
+		if a, ok := a.(graphql.Argument); ok {
+			results = append(results, a)
+		} else {
+			return results, fmt.Errorf("got unexpected type: %#v", a)
+		}
+	}
+	return results, nil
+}
+Argument ← _ an:ArgumentName _ ':' _ v:Value _ {
+	return graphql.Argument{
+		Name: an.(string),
+		Value: v,
+	}, nil
+}
 ArgumentName ← Name
 
-Name ← [a-z_]i [0-9a-z_]i*
+Name ← [a-z_]i [0-9a-z_]i* {
+	return string(c.text), nil
+}
 
-FragmentSpread ←  "..." FragmentName Directives?
-FragmentDefinition ← "fragment" Type FragmentName Directives? Selections
-FragmentName ← Name
+FragmentSpread ←  "..." fn:FragmentName ds:Directives? {
+	var directives []graphql.Directive
+	if ds != nil {
+		directives = ds.([]graphql.Directive)
+	}
+	return graphql.FragmentSpread{
+		Name: fn.(string),
+		Directives: directives,
+	}, nil	
+}
+FragmentDefinition ← "fragment" _ t:Type _ fn:FragmentName _ ds:Directives? _ sels:Selections _ {
+	var directives []graphql.Directive
+	if ds != nil {
+		directives = ds.([]graphql.Directive)
+	}
+	return graphql.FragmentDefinition{
+		Name: fn.(string),
+		Type: t.(graphql.Type),
+		Selections: sels.([]graphql.Selection),
+		Directives: directives,
+	}, nil
+}
+FragmentName ← n:Name { return n, nil }
 
-Value ← _ (Null / Boolean / Int / Float / String / Array / Object / Variable) _
-// TODO(tmc) Value_variable, Value_qualifyEnum
+Value ← _ v:(Null / Boolean / Int / Float / String / EnumValue / Array / Object / Variable) _ {
+	return v, nil
+}
 
-Null ← "null"
-Boolean ← "true" / "false"
-Int ← Sign? IntegerPart
-Float ← Sign? IntegerPart '.' Digit+ ExponentPart?
+Null ← "null" { return nil, nil }
+Boolean ← "true" { return true, nil } / "false" { return false, nil }
+Int ← Sign? IntegerPart {
+	return strconv.Atoi(string(c.text))
+}
+Float ← Sign? IntegerPart '.' Digit+ ExponentPart? {
+	return strconv.ParseFloat(string(c.text), 64)
+}
 Sign ← '-'
 IntegerPart ← '0' / NonZeroDigit Digit*
 ExponentPart ← 'e' Sign? Digit+
 Digit ← [0-9]
 NonZeroDigit ← [123456789]
-String ← '"' StringCharacter* '"'
+String ← '"' s:string '"' {
+ return s.(string), nil
+}
+string ← StringCharacter* {
+	return string(c.text), nil
+}
 StringCharacter ← [^\\"] / '\\' EscapedCharacter / '\\' EscapedUnicode
 EscapedUnicode ← 'u' [0-9a-f]i [0-9a-f]i [0-9a-f]i [0-9a-f]i
 EscapedCharacter ← ["/bfnrt] / '\\'
- 
+
+EnumValue ← tn:TypeName '.' v:EnumValueName {
+	return graphql.EnumValue{
+		EnumTypeName: tn.(string),
+		Value: v.(string),
+	}, nil 
+}
 Array ← '[' Value* ']'
 Object ← '{' Property+ '}'
 
-Variable ← VariableName
-// TODO(tmc): the above should be: Variable ← VariableName / VariablePropertySelection
-VariableName ← '$' [0-9a-z_]i+
-VariablePropertySelection ← Variable '.' PropertyName
+Variable ← vn:VariableName '.' pn:PropertyName {
+	return graphql.Variable{
+		Name: vn.(string),
+		PropertySelection: &graphql.Variable{Name: pn.(string)},
+	}, nil
+} / vn:VariableName {
+	return graphql.Variable{
+		Name: vn.(string),
+	}, nil
+} 
+VariableName ← '$' [0-9a-z_]i+ {
+	return string(c.text), nil
+}
+// TODO(tmc): Variable above should be something like Variable ← VariableName / VariablePropertySelection
+// peg parsers can't express left recursion so for now only one level of variable propery access is allowed
+//
+// VariablePropertySelection ← Variable '.' PropertyName
 
 Property ← PropertyName ':' Value
 PropertyName ← Name
 
-Directives ← Directive+
-Directive ← _ '@' (DirectiveName ':' _ Value /
-	               DirectiveName ':' _ Type /
-                   DirectiveName) _
+Directives ← ds:Directive+ {
+	result := []graphql.Directive{}
+	for _, d := range ifs(ds) {
+		result = append(result, d.(graphql.Directive))
+	}
+	return result, nil
+}
+Directive ← '@' d:((dn:DirectiveName ':' _ v:Value) {
+	val := v.(graphql.Value)
+	return graphql.Directive{
+		Name: dn.(string),
+		Value: &val,
+	}, nil
+} / (dn:DirectiveName ':' _ t:Type) {
+	typ := t.(graphql.Value)
+	return graphql.Directive{
+		Name: dn.(string),
+		Value: &typ,
+	}, nil
+} / dn:DirectiveName {
+	return graphql.Directive{
+		Name: dn.(string),
+	}, nil
+} ) _ {
+	return d, nil
+}
+
 DirectiveName ← Name
 
-Type ← OptionalType / GenericType
-OptionalType ← GenericType?
-GenericType ← TypeName TypeParams?
+Type ← t:(OptionalType / GenericType) { return t, nil }
+OptionalType ← t:GenericType '?' {
+	typ := t.(graphql.Type)
+	typ.Optional = true
+	return typ, nil
+}
+GenericType ← tn:TypeName _ tps:TypeParams? {
+	return graphql.Type{
+		Name: tn.(string),
+	}, nil
+}
 TypeParams ← ':' '<' Type+ '>'
 TypeName ← Name
-TypeDefinition ← "type" _ TypeName _ Interfaces? _ '{' FieldDefinition+ '}'
-TypeExtension ← "extend" _ TypeName _ Interfaces? _ '{' FieldDefinition+ '}'
-Interfaces ← GenericType+
-FieldDefinition ← _ FieldName _ ArgumentDefinitions? _ ':' _ Type _
-ArgumentDefinitions ← '(' ArgumentDefinition+ ')'
-ArgumentDefinition ← _ ArgumentName _ ':' _ Type _ DefaultValue? _
-EnumDefinition ← "enum" TypeName '{' EnumValueName+ '}'
-EnumValueName ← Name
+TypeDefinition ← "type" _ tn:TypeName _ is:Interfaces? _ '{' fds:FieldDefinition+ '}' {
+	var (
+		interfaces []graphql.Interface
+		fieldDefinitions []graphql.FieldDefinition
+	)
+	if is != nil {
+		interfaces = is.([]graphql.Interface)
+	}
+	if fds != nil {
+		fieldDefinitions = make([]graphql.FieldDefinition, 0, len(ifs(fds)))
+	}
+	for _, fd := range ifs(fds) {
+		fieldDefinitions = append(fieldDefinitions, fd.(graphql.FieldDefinition))
+	}
+	return graphql.TypeDefinition{
+		Name: tn.(string),
+		Interfaces: interfaces,
+		FieldDefinitions: fieldDefinitions,
+	}, nil
+}
+TypeExtension ← "extend" _ tn:TypeName _ is:Interfaces? _ '{' fds:FieldDefinition+ '}' {
+	var (
+		interfaces []graphql.Interface
+		fieldDefinitions []graphql.FieldDefinition
+	)
+	if is != nil {
+		interfaces = is.([]graphql.Interface)
+	}
+	if fds != nil {
+		fieldDefinitions = make([]graphql.FieldDefinition, 0, len(ifs(fds)))
+	}
+	for _, fd := range ifs(fds) {
+		fieldDefinitions = append(fieldDefinitions, fd.(graphql.FieldDefinition))
+	}
+	return graphql.TypeExtension{
+		Name: tn.(string),
+		Interfaces: interfaces,
+		FieldDefinitions: fieldDefinitions,
+	}, nil
+}
+Interfaces ← GenericType+ {
+	//return []graphql.Interface{}, nil
+	return nil, fmt.Errorf("TODO: not yet implemented")
+}
+FieldDefinition ← _ fn:FieldName _ args:ArgumentDefinitions? _ ':' _ t:Type _ {
+	var argDefs []graphql.ArgumentDefinition
+	if args != nil {
+		argDefs = args.([]graphql.ArgumentDefinition)
+	}
+	return graphql.FieldDefinition{
+		Name: fn.(string),
+		Type: t.(graphql.Type),
+		ArgumentDefinitions: argDefs,
+	}, nil
+}
+ArgumentDefinitions ← '(' args:ArgumentDefinition+ ')' {
+	result := []graphql.ArgumentDefinition{}
+	for _, a := range ifs(args) {
+		result = append(result, a.(graphql.ArgumentDefinition))
+	}	
+	return result, nil
+}
+ArgumentDefinition ← _ an:ArgumentName _ ':' _ t:Type _ dv:DefaultValue? {
+	var defaultVal *graphql.Value
+	if dv != nil {
+		v := dv.(graphql.Value)
+		defaultVal = &v
+	}
+	return graphql.ArgumentDefinition{
+		Name: an.(string),
+		Type: t.(graphql.Type),
+		DefaultValue: defaultVal,
+	}, nil
+}
+EnumDefinition ← "enum" _ tn:TypeName _ '{' vals:EnumValueName+ '}' {
+	values := []string{}
+	for _, v := range ifs(vals) {
+		values = append(values, v.(string))
+	}
+	return graphql.EnumDefinition{
+		Name: tn.(string),
+		Values: values,
+	}, nil
+}
+EnumValueName ← _ n:Name _ { return n, nil }
 
-_ "ignored" ← (whitespace / Comment / ',')*
-whitespace ← [ \n\t\r]+
+_ "ignored" ← (whitespace / Comment / ',')* { return nil, nil }
+whitespace ← [ \n\t\r]
 
 EOF ← !.

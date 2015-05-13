@@ -25,6 +25,11 @@ var shouldParse = []string{
 		profilePic(width: 100, height: 50)
 	  }
 	}`,
+	`query getFoobarFriends($user: User) {
+	  user(id: $user.id) {
+		name
+	  }
+	}`,
 	`query getFoobarFriends($cursor: String) {
 	  user(id: 42) {
 		friends(isViewerFriend: true, first: 10, after: $cursor) {
@@ -64,7 +69,6 @@ var shouldParse = []string{
 		...threadComments
 	  }
 	}
-
 	fragment Comment ThreadComments @maxDepth: 5 {
 	  comments(first: 5) {
 		nodes {
@@ -78,17 +82,12 @@ var shouldParse = []string{
 	`extend User {
 	  currentLocation: GPSCoordinate
 	}
-
 	type GPSCoordinate {
 	  lat: Number
 	  lon: Number
-	}
-
-	enum Color { RED, GREEN, BLUE }
-
-	query Complement(color: Color = Color.GREEN){}
-
-	extend User {
+	}`,
+	`enum Color { RED, GREEN, BLUE }`,
+	`extend User {
 	  # Resolution is in meters
 	  currentLocation(resolution: Int = 3000): GPSCoordinate
 	}`,
@@ -101,10 +100,14 @@ var shouldParse = []string{
 
 func TestSuccessfulParses(t *testing.T) {
 	for i, in := range shouldParse {
-		//_, err := parser.Parse("parser_test.go", []byte(in), parser.Debug(true))
-		_, err := parser.Parse("parser_test.go", []byte(in))
+		//d, err := parser.Parse("parser_test.go", []byte(in), parser.Debug(true))
+		d, err := parser.Parse("parser_test.go", []byte(in))
 		if err != nil {
 			t.Errorf("case %d: %v", i+1, err)
 		}
+		_ = d
+		//fmt.Println(in, "\n\n")
+		//j, _ := json.MarshalIndent(d, "", " ")
+		//fmt.Println(string(j), "\n\n\n\n")
 	}
 }

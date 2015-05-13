@@ -12,11 +12,11 @@ import (
 
 func ExampleSchema() {
 	s := schema.New()
-	call, err := parser.ParseOperation([]byte(`schema(){root_calls}`))
+	call, err := parser.ParseOperation([]byte(`{schema(){root_calls}}`))
 	if err != nil {
 		fmt.Println(err)
 	}
-	result, err := s.HandleCall(call)
+	result, err := s.HandleField(call.Selections[0].Field)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -32,12 +32,12 @@ func ExampleSchema() {
 
 type nowProvider struct{}
 
-func (n *nowProvider) now(c graphql.Operation) (interface{}, error) {
+func (n *nowProvider) now(f *graphql.Field) (interface{}, error) {
 	return time.Now(), nil
 }
 
-func (n *nowProvider) RootCalls() map[string]schema.CallHandler {
-	return map[string]schema.CallHandler{
+func (n *nowProvider) RootCalls() map[string]schema.FieldHandler {
+	return map[string]schema.FieldHandler{
 		"now": n.now,
 	}
 }
@@ -45,11 +45,11 @@ func (n *nowProvider) RootCalls() map[string]schema.CallHandler {
 func ExampleSchemaCustomType() {
 	s := schema.New()
 	s.Register(new(nowProvider))
-	call, err := parser.ParseOperation([]byte(`schema(){root_calls}`))
+	call, err := parser.ParseOperation([]byte(`{schema(){root_calls}}`))
 	if err != nil {
 		fmt.Println(err)
 	}
-	result, err := s.HandleCall(call)
+	result, err := s.HandleField(call.Selections[0].Field)
 	if err != nil {
 		fmt.Println(err)
 	}

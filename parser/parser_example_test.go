@@ -7,48 +7,31 @@ import (
 	"github.com/tmc/graphql/parser"
 )
 
-const exampleQuery = `{
-  user(id: 42) {
-	friends(isViewerFriend: true, first: 10) {
-	  nodes {
-		name
-	  }
-	}
-  }
-}`
+const exampleQuery = `{ foo { field } }`
 
 func ExampleParse() {
 	result, err := parser.ParseOperation([]byte(exampleQuery))
 	if err != nil {
 		fmt.Println("err:", err)
+	} else {
+		asjson, _ := json.MarshalIndent(result, "", " ")
+		fmt.Println(string(asjson))
 	}
-	asjson, _ := json.MarshalIndent(result, "", " ")
-	fmt.Println(string(asjson))
 	// output:
 	// {
-	//  "Name": "node",
-	//  "Arguments": [
+	//  "Type": "query",
+	//  "Selections": [
 	//   {
-	//    "Name": "id",
-	//    "Value": "42"
-	//   }
-	//  ],
-	//  "Fields": [
-	//   {
-	//    "Name": "id"
-	//   },
-	//   {
-	//    "Name": "answer"
-	//   },
-	//   {
-	//    "Fields": [
-	//     {
-	//      "Name": "towel"
-	//     },
-	//     {
-	//      "Name": "planet"
-	//     }
-	//    ]
+	//    "Field": {
+	//     "Name": "foo",
+	//     "Selections": [
+	//      {
+	//       "Field": {
+	//        "Name": "field"
+	//       }
+	//      }
+	//     ]
+	//    }
 	//   }
 	//  ]
 	// }
