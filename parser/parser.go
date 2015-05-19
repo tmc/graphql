@@ -2,6 +2,7 @@ package parser
 
 import (
 	"errors"
+	"log"
 
 	"github.com/tmc/graphql"
 	"github.com/tmc/graphql/internal/parser"
@@ -15,23 +16,22 @@ var (
 )
 
 // ParseOperation attempts to parse a graphql.Operation from a byte slice.
-func ParseOperation(query []byte) (graphql.Operation, error) {
+func ParseOperation(query []byte) (*graphql.Operation, error) {
 	result, err := parser.Parse("", query)
 	if err != nil {
-		panic(err)
-		// TODO(tmc))
-		return graphql.Operation{}, ErrMalformedOperation
+		log.Println("parse error:", err)
+		return nil, ErrMalformedOperation
 	}
 	doc, ok := result.(graphql.Document)
 	if !ok {
-		return graphql.Operation{}, ErrMalformedOperation
+		return nil, ErrMalformedOperation
 	}
 	switch len(doc.Operations) {
 	case 1:
-		return doc.Operations[0], nil
+		return &doc.Operations[0], nil
 	case 0:
-		return graphql.Operation{}, ErrMalformedOperation
+		return nil, ErrMalformedOperation
 	default:
-		return graphql.Operation{}, ErrMultipleOperations
+		return nil, ErrMultipleOperations
 	}
 }
