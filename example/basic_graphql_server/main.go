@@ -38,7 +38,7 @@ func (n *nowProvider) uptime(r resolver.Resolver, f *graphql.Field) (interface{}
 
 func (n *nowProvider) GraphQLTypeInfo() schema.GraphQLTypeInfo {
 	return schema.GraphQLTypeInfo{
-		Name:        "now Provider",
+		Name:        "nowProvider",
 		Description: "example root call provider",
 		Fields: map[string]*schema.GraphQLFieldSpec{
 			"now":    {"now", "Provides the current server time", n.now, []graphql.Argument{}, true},
