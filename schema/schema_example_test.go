@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/tmc/graphql"
+	"github.com/tmc/graphql/executor"
+	"github.com/tmc/graphql/executor/resolver"
 	"github.com/tmc/graphql/parser"
 	"github.com/tmc/graphql/schema"
 )
@@ -16,32 +18,38 @@ func ExampleSchema() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	result, err := s.HandleField(call.Selections[0].Field)
+	executor := executor.New(s)
+	result, err := executor.HandleOperation(call)
 	if err != nil {
 		fmt.Println(err)
 	}
 	asjson, _ := json.MarshalIndent(result, "", " ")
 	fmt.Println(string(asjson))
 	// output:
-	// {
-	//  "root_calls": [
-	//   "schema"
-	//  ]
-	// }
+	// [
+	//  {
+	//   "root_calls": [
+	//    "schema"
+	//   ]
+	//  }
+	// ]
 }
 
 type nowProvider struct{}
 
-func (n *nowProvider) now(f *graphql.Field) (interface{}, error) {
+func (n *nowProvider) now(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
 	return time.Now(), nil
 }
 
-func (n *nowProvider) RootCalls() map[string]schema.FieldHandler {
-	return map[string]schema.FieldHandler{
-		"now": n.now,
+func (n *nowProvider) GraphQLTypeInfo() schema.GraphQLTypeInfo {
+	return schema.GraphQLTypeInfo{
+		Name:        "now Provider",
+		Description: "example root call provider",
+		Fields: map[string]*schema.GraphQLFieldSpec{
+			"now": {"now", "Provides the current server time", n.now, []graphql.Argument{}, true},
+		},
 	}
 }
-
 func ExampleSchemaCustomType() {
 	s := schema.New()
 	s.Register(new(nowProvider))
@@ -49,17 +57,20 @@ func ExampleSchemaCustomType() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	result, err := s.HandleField(call.Selections[0].Field)
+	executor := executor.New(s)
+	result, err := executor.HandleOperation(call)
 	if err != nil {
 		fmt.Println(err)
 	}
 	asjson, _ := json.MarshalIndent(result, "", " ")
 	fmt.Println(string(asjson))
 	// output:
-	// {
-	//  "root_calls": [
-	//   "now",
-	//   "schema"
-	//  ]
-	// }
+	// [
+	//  {
+	//   "root_calls": [
+	//    "now",
+	//    "schema"
+	//   ]
+	//  }
+	// ]
 }

@@ -1,5 +1,7 @@
 package graphql
 
+import "encoding/json"
+
 type OperationType string
 
 const (
@@ -23,10 +25,20 @@ type Operation struct {
 	Directives          []Directive          `json:",omitempty"`
 }
 
+func (o *Operation) String() string {
+	j, _ := json.Marshal(o)
+	return string(j)
+}
+
 // A Selection is either a Field or a FragmentSpread
 type Selection struct {
 	Field          *Field          `json:",omitempty"`
 	FragmentSpread *FragmentSpread `json:",omitempty"`
+}
+
+func (s *Selection) String() string {
+	j, _ := json.Marshal(s)
+	return string(j)
 }
 
 type Field struct {
