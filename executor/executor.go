@@ -3,6 +3,7 @@ package executor
 import (
 	"fmt"
 	"log"
+	"reflect"
 
 	"github.com/tmc/graphql"
 	"github.com/tmc/graphql/schema"
@@ -22,6 +23,7 @@ func (e *Executor) HandleOperation(o *graphql.Operation) (interface{}, error) {
 	rootSelections := o.Selections
 	rootCalls := e.schema.RootCalls()
 	result := make([]interface{}, 0)
+
 	for _, selection := range rootSelections {
 		rootCallHandler, ok := rootCalls[selection.Field.Name]
 		if !ok {
@@ -40,7 +42,14 @@ func (e *Executor) HandleOperation(o *graphql.Operation) (interface{}, error) {
 	return result, nil
 }
 
+func isSlice(value interface{}) bool {
+	return reflect.TypeOf(value).Kind() == reflect.Slice
+}
+
 func (e *Executor) Resolve(partial interface{}, field *graphql.Field) (interface{}, error) {
+	if isSlice(partial) {
+		return e.resolveSlice(partial, field)
+	}
 	graphQLValue, ok := partial.(schema.GraphQLType)
 	// if we have a scalar we're done
 	if !ok {
@@ -71,4 +80,17 @@ func (e *Executor) Resolve(partial interface{}, field *graphql.Field) (interface
 		result[fieldName] = resolved
 	}
 	return result, nil
+}
+
+func (e *Executor) resolveSlice(partials interface{}, field *graphql.Field) (interface{}, error) {
+	v := reflect.ValueOf(partials)
+	results := make([]interface{}, 0, v.Len())
+	for i := 0; i < v.Len(); i++ {
+		result, err := e.Resolve(v.Index(i).Interface(), field)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, result)
+	}
+	return results, nil
 }
