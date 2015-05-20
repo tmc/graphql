@@ -1,6 +1,8 @@
 package schema
 
 import (
+	"sort"
+
 	"github.com/tmc/graphql"
 	"github.com/tmc/graphql/executor/resolver"
 )
@@ -18,6 +20,45 @@ type GraphQLTypeInfo struct {
 // GraphQLType is the interface that all GraphQL types satisfy
 type GraphQLType interface {
 	GraphQLTypeInfo() GraphQLTypeInfo
+}
+
+func (g GraphQLTypeInfo) GraphQLTypeInfo() GraphQLTypeInfo {
+	return GraphQLTypeInfo{
+		Name:        "GraphQLTypeInfo",
+		Description: "Holds information about GraphQLTypeInfo",
+		Fields: GraphQLFieldSpecMap{
+			"name": {
+				Name:        "name",
+				Description: "The name of the type.",
+				Func: func(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
+					return r.Resolve(g.Name, f)
+				},
+			},
+			"description": {
+				Name:        "description",
+				Description: "The description of the type.",
+				Func: func(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
+					return r.Resolve(g.Description, f)
+				},
+			},
+			"fields": {
+				Name:        "fields",
+				Description: "The fields associated with the type.",
+				Func: func(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
+					fields := make([]string, 0, len(g.Fields))
+					for fieldName := range g.Fields {
+						fields = append(fields, fieldName)
+					}
+					sort.Strings(fields)
+					result := make([]*GraphQLFieldSpec, 0, len(g.Fields))
+					for _, fieldName := range fields {
+						result = append(result, g.Fields[fieldName])
+					}
+					return r.Resolve(result, f)
+				},
+			},
+		},
+	}
 }
 
 type Scalar struct {

@@ -1,7 +1,6 @@
 package schema
 
 import (
-	"log"
 	"sort"
 
 	"github.com/tmc/graphql"
@@ -86,14 +85,27 @@ func (s *Schema) GraphQLTypeInfo() GraphQLTypeInfo {
 		Description: "Root schema object",
 		Fields: map[string]*GraphQLFieldSpec{
 			"schema":     {"schema", "Schema entry root call", s.handleSchemaCall, nil, true},
+			"types":      {"types", "Introspection of registered types", s.handleTypesCall, nil, true},
 			"root_calls": {"root_calls", "List root_calls of registered types", s.handleRootCalls, nil, false},
 		},
 	}
 }
 
 func (s *Schema) handleSchemaCall(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
-	log.Println("handleSchemaCall:", f)
 	return s, nil
+}
+
+func (s *Schema) handleTypesCall(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
+	typeNames := make([]string, 0, len(s.registeredTypes))
+	for typeName := range s.registeredTypes {
+		typeNames = append(typeNames, typeName)
+	}
+	sort.Strings(typeNames)
+	result := make([]GraphQLTypeInfo, 0, len(typeNames))
+	for _, typeName := range typeNames {
+		result = append(result, s.registeredTypes[typeName])
+	}
+	return result, nil
 }
 
 func (s *Schema) handleRootCalls(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
