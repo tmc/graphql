@@ -43,11 +43,14 @@ func (e *Executor) HandleOperation(o *graphql.Operation) (interface{}, error) {
 }
 
 func isSlice(value interface{}) bool {
+	if value == nil {
+		return false
+	}
 	return reflect.TypeOf(value).Kind() == reflect.Slice
 }
 
 func (e *Executor) Resolve(partial interface{}, field *graphql.Field) (interface{}, error) {
-	if isSlice(partial) {
+	if partial != nil && isSlice(partial) {
 		return e.resolveSlice(partial, field)
 	}
 	graphQLValue, ok := partial.(schema.GraphQLType)
