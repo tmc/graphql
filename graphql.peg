@@ -121,7 +121,11 @@ Field ← fa:FieldAlias? _ fn:FieldName _ as:Arguments? _ ds:Directives? _ sels:
 		selections []graphql.Selection
 		arguments []graphql.Argument
 		directives []graphql.Directive
+		fieldAlias string
 	)
+	if fa != nil {
+		fieldAlias = fa.(string)
+	}
 	if sels != nil {
 		selections = sels.([]graphql.Selection)
 	}
@@ -133,12 +137,13 @@ Field ← fa:FieldAlias? _ fn:FieldName _ as:Arguments? _ ds:Directives? _ sels:
 	}
 	return graphql.Field{
 		Name: fn.(string),
+		Alias: fieldAlias,
 		Arguments: arguments,
 		Selections: selections,
 		Directives: directives,
 	}, nil
 }
-FieldAlias ← Name ':'
+FieldAlias ← n:Name ':' { return n, nil }
 FieldName ← Name
 Arguments ← '(' args:(Argument*) ')' {
 	results := []graphql.Argument{}

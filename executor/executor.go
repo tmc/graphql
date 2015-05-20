@@ -80,6 +80,9 @@ func (e *Executor) Resolve(partial interface{}, field *graphql.Field) (interface
 		if err != nil {
 			return nil, err
 		}
+		if selection.Field.Alias != "" {
+			fieldName = selection.Field.Alias
+		}
 		result[fieldName] = resolved
 	}
 	return result, nil
