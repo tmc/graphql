@@ -51,19 +51,6 @@ func WithIntrospectionField(typeInfo GraphQLTypeInfo) GraphQLTypeInfo {
 	return typeInfo
 }
 
-// External entrypoint
-
-/*
-// HandleField dispatches a graphql.Field to the appropriate registered type.
-func (s *Schema) HandleField(f *graphql.Field) (interface{}, error) {
-	handler, ok := s.rootFields[f.Name]
-	if !ok {
-		return nil, fmt.Errorf("schema: no registered types handle the root call '%s'", f.Name)
-	}
-	return handler.Func(f)
-}
-*/
-
 func (s *Schema) RootFields() map[string]*GraphQLFieldSpec {
 	return s.rootFields
 }
