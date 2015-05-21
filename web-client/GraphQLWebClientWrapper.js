@@ -15,7 +15,7 @@ export default class GraphQLWebClientWrapper extends React.Component {
         `{ __schema { root_fields { name, description } } }`,
         `{ __types { name, description} }`,
         `{ __types { name, description, fields { name, description } } }`,
-		`{ TodoUserClass{ objectId, name, lists:TodoItemListClass_owner { objectId, name, items:TodoItemClass_list { objectId, done, description } } } }`
+        `{ TodoUserClass{ objectId, name, lists:TodoItemListClass_owner { objectId, name, items:TodoItemClass_list { objectId, done, description } } } }`
       ]
     };
     this.state.defaultQuery = this.state.cannedQueries[0];
