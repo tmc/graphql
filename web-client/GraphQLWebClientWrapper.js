@@ -9,8 +9,13 @@ var styles = {
 export default class GraphQLWebClientWrapper extends React.Component {
   constructor(props) {
     super(props);
+    var endpoint = this.props.endpoint;
+    if (window && window.location.search) {
+      var m = window.location.search.match(/endpoint=(.+)/)[1];
+      if (m) { endpoint = m }
+    }
     this.state = {
-      endpoint: this.props.endpoint,
+      endpoint: endpoint,
       cannedQueries: [
         `{ __schema { root_fields { name, description } } }`,
         `{ __types { name, description} }`,
