@@ -49,7 +49,7 @@ func (n *nowProvider) now(r resolver.Resolver, f *graphql.Field) (interface{}, e
 func (n *nowProvider) GraphQLTypeInfo() schema.GraphQLTypeInfo {
 	return schema.GraphQLTypeInfo{
 		Name:        "now Provider",
-		Description: "example root call provider",
+		Description: "example root field provider",
 		Fields: map[string]*schema.GraphQLFieldSpec{
 			"now": {"now", "Provides the current server time", n.now, []graphql.Argument{}, true},
 		},

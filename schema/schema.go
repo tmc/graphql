@@ -7,7 +7,7 @@ import (
 	"github.com/tmc/graphql/executor/resolver"
 )
 
-// Schema represents the registered types that know how to respond to root calls.
+// Schema represents the registered types that know how to respond to root fields.
 type Schema struct {
 	registeredTypes map[string]GraphQLTypeInfo
 	rootFields      map[string]*GraphQLFieldSpec
@@ -64,14 +64,14 @@ func (s *Schema) RegisteredTypes() map[string]GraphQLTypeInfo {
 	return s.registeredTypes
 }
 
-// The below makes Schema itsself a GraphQLType and provides the root entry call of 'schema'
+// The below makes Schema itsself a GraphQLType and provides the root field of 'schema'
 
 func (s *Schema) GraphQLTypeInfo() GraphQLTypeInfo {
 	return GraphQLTypeInfo{
 		Name:        "Schema",
 		Description: "Root schema object",
 		Fields: map[string]*GraphQLFieldSpec{
-			"__schema":    {"__schema", "Schema entry root call", s.handleSchemaCall, nil, true},
+			"__schema":    {"__schema", "Schema entry root field", s.handleSchemaCall, nil, true},
 			"__types":     {"__types", "Introspection of registered types", s.handleTypesCall, nil, true},
 			"root_fields": {"root_fields", "List fields that are exposed at the root of the GraphQL schema.", s.handleRootFields, nil, false},
 		},

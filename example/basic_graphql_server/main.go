@@ -3,10 +3,10 @@
 // Example:
 //  $ go get github.com/tmc/graphql/example/basic_graphql_server
 //  $ basic_graphql_server &
-//  $ curl 'http://localhost:8080/?q=\{schema()\{root_calls\}\}'
-//  {"data":{"root_calls":["schema"]}}
+//  $ curl -g 'http://localhost:8080/?q={schema{root_fields{name}}}'
+//  {"data":{"root_calls":[{"name":"schema"}]}}
 //
-// Here we see the server showing the available root calls ("schema").
+// Here we see the server showing the available root fields ("schema").
 package main
 
 import (
@@ -39,7 +39,7 @@ func (n *nowProvider) uptime(r resolver.Resolver, f *graphql.Field) (interface{}
 func (n *nowProvider) GraphQLTypeInfo() schema.GraphQLTypeInfo {
 	return schema.GraphQLTypeInfo{
 		Name:        "nowProvider",
-		Description: "example root call provider",
+		Description: "example root field provider",
 		Fields: map[string]*schema.GraphQLFieldSpec{
 			"now":    {"now", "Provides the current server time", n.now, []graphql.Argument{}, true},
 			"uptime": {"uptime", "Provides the current server uptime", n.uptime, []graphql.Argument{}, true},

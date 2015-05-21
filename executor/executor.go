@@ -27,7 +27,7 @@ func (e *Executor) HandleOperation(o *graphql.Operation) (interface{}, error) {
 	for _, selection := range rootSelections {
 		rootFieldHandler, ok := rootFields[selection.Field.Name]
 		if !ok {
-			return nil, fmt.Errorf("Root call '%s' is not registered", selection.Field.Name)
+			return nil, fmt.Errorf("Root field '%s' is not registered", selection.Field.Name)
 		}
 		partial, err := rootFieldHandler.Func(e, selection.Field)
 		if err != nil {
