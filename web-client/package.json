@@ -1,0 +1,4 @@
+{"dependencies": {
+	"react": "*",
+	"babel-loader": "*"
+}}
