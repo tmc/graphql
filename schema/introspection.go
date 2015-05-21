@@ -47,8 +47,11 @@ func (i *GraphQLTypeIntrospector) name(r resolver.Resolver, f *graphql.Field) (i
 
 func (i *GraphQLTypeIntrospector) fields(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
 	result := []interface{}{}
-	for key := range i.typeInfo.Fields {
-		res, err := r.Resolve(i.typeInfo.Fields[key], f)
+	for _, fieldInfo := range i.typeInfo.Fields {
+		if fieldInfo.IsRoot {
+			continue
+		}
+		res, err := r.Resolve(fieldInfo, f)
 		if err != nil {
 			return nil, err
 		}

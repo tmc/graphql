@@ -72,12 +72,13 @@ func (s Scalar) GraphQLTypeInfo() GraphQLTypeInfo {
 	}
 }
 
+// GraphQLFieldSpec describes a field associated with a type in a GraphQL schema.
 type GraphQLFieldSpec struct {
 	Name        string
 	Description string
 	Func        GraphQLFieldFunc
-	Arguments   []graphql.Argument
-	IsRootCall  bool
+	Arguments   []graphql.Argument // Describes any arguments the field accepts
+	IsRoot      bool               // If true, this field should be exposed at the root of the GraphQL schema
 }
 
 func (g *GraphQLFieldSpec) GraphQLTypeInfo() GraphQLTypeInfo {

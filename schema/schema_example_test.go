@@ -14,7 +14,7 @@ import (
 
 func ExampleSchema() {
 	s := schema.New()
-	call, err := parser.ParseOperation([]byte(`{schema(){root_calls}}`))
+	call, err := parser.ParseOperation([]byte(`{__schema{root_fields{name}}}`))
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -28,8 +28,13 @@ func ExampleSchema() {
 	// output:
 	// [
 	//  {
-	//   "root_calls": [
-	//    "schema"
+	//   "root_fields": [
+	//    {
+	//     "name": "__schema"
+	//    },
+	//    {
+	//     "name": "__types"
+	//    }
 	//   ]
 	//  }
 	// ]
@@ -53,7 +58,7 @@ func (n *nowProvider) GraphQLTypeInfo() schema.GraphQLTypeInfo {
 func ExampleSchemaCustomType() {
 	s := schema.New()
 	s.Register(new(nowProvider))
-	call, err := parser.ParseOperation([]byte(`{schema(){root_calls}}`))
+	call, err := parser.ParseOperation([]byte(`{__schema{root_fields{name}}}`))
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -67,9 +72,16 @@ func ExampleSchemaCustomType() {
 	// output:
 	// [
 	//  {
-	//   "root_calls": [
-	//    "now",
-	//    "schema"
+	//   "root_fields": [
+	//    {
+	//     "name": "__schema"
+	//    },
+	//    {
+	//     "name": "__types"
+	//    },
+	//    {
+	//     "name": "now"
+	//    }
 	//   ]
 	//  }
 	// ]

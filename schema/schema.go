@@ -10,14 +10,14 @@ import (
 // Schema represents the registered types that know how to respond to root calls.
 type Schema struct {
 	registeredTypes map[string]GraphQLTypeInfo
-	rootCalls       map[string]*GraphQLFieldSpec
+	rootFields      map[string]*GraphQLFieldSpec
 }
 
 // New prepares a new Schema.
 func New() *Schema {
 	s := &Schema{
 		registeredTypes: map[string]GraphQLTypeInfo{},
-		rootCalls:       map[string]*GraphQLFieldSpec{},
+		rootFields:      map[string]*GraphQLFieldSpec{},
 	}
 	// self-register
 	s.Register(s)
@@ -35,8 +35,8 @@ func (s *Schema) Register(t GraphQLType) {
 	s.registeredTypes[t.GraphQLTypeInfo().Name] = typeInfo
 	// TODO(tmc): collision handling
 	for name, fieldSpec := range typeInfo.Fields {
-		if fieldSpec.IsRootCall {
-			s.rootCalls[name] = fieldSpec
+		if fieldSpec.IsRoot {
+			s.rootFields[name] = fieldSpec
 		}
 	}
 }
@@ -56,7 +56,7 @@ func WithIntrospectionField(typeInfo GraphQLTypeInfo) GraphQLTypeInfo {
 /*
 // HandleField dispatches a graphql.Field to the appropriate registered type.
 func (s *Schema) HandleField(f *graphql.Field) (interface{}, error) {
-	handler, ok := s.rootCalls[f.Name]
+	handler, ok := s.rootFields[f.Name]
 	if !ok {
 		return nil, fmt.Errorf("schema: no registered types handle the root call '%s'", f.Name)
 	}
@@ -64,8 +64,8 @@ func (s *Schema) HandleField(f *graphql.Field) (interface{}, error) {
 }
 */
 
-func (s *Schema) RootCalls() map[string]*GraphQLFieldSpec {
-	return s.rootCalls
+func (s *Schema) RootFields() map[string]*GraphQLFieldSpec {
+	return s.rootFields
 }
 
 func (s *Schema) GetTypeInfo(o GraphQLType) GraphQLTypeInfo {
@@ -84,9 +84,9 @@ func (s *Schema) GraphQLTypeInfo() GraphQLTypeInfo {
 		Name:        "Schema",
 		Description: "Root schema object",
 		Fields: map[string]*GraphQLFieldSpec{
-			"schema":     {"schema", "Schema entry root call", s.handleSchemaCall, nil, true},
-			"types":      {"types", "Introspection of registered types", s.handleTypesCall, nil, true},
-			"root_calls": {"root_calls", "List root_calls of registered types", s.handleRootCalls, nil, false},
+			"__schema":    {"__schema", "Schema entry root call", s.handleSchemaCall, nil, true},
+			"__types":     {"__types", "Introspection of registered types", s.handleTypesCall, nil, true},
+			"root_fields": {"root_fields", "List fields that are exposed at the root of the GraphQL schema.", s.handleRootFields, nil, false},
 		},
 	}
 }
@@ -108,11 +108,15 @@ func (s *Schema) handleTypesCall(r resolver.Resolver, f *graphql.Field) (interfa
 	return result, nil
 }
 
-func (s *Schema) handleRootCalls(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
-	rootCalls := []string{}
-	for rootCall := range s.rootCalls {
-		rootCalls = append(rootCalls, rootCall)
+func (s *Schema) handleRootFields(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
+	rootFields := []string{}
+	for rootField := range s.rootFields {
+		rootFields = append(rootFields, rootField)
 	}
-	sort.Strings(rootCalls)
-	return rootCalls, nil
+	sort.Strings(rootFields)
+	result := make([]*GraphQLFieldSpec, 0, len(rootFields))
+	for _, field := range rootFields {
+		result = append(result, s.rootFields[field])
+	}
+	return result, nil
 }

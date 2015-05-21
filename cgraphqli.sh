@@ -9,7 +9,7 @@ set -eou pipefail
 BASEURL=${1:-"http://localhost:8080/"}
 
 function query(){
-	local q=${1:-"{ schema(){ root_calls { name } } }"}
+	local q=${1:-"{ __schema{ root_fields { name } } }"}
 	echo curl -sgG --data-urlencode "\"q=${q}\"" "${BASEURL}"
 	curl -sgG --data-urlencode "q=${q}" "${BASEURL}" | jq .
 	echo

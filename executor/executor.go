@@ -21,15 +21,15 @@ func New(schema *schema.Schema) *Executor {
 
 func (e *Executor) HandleOperation(o *graphql.Operation) (interface{}, error) {
 	rootSelections := o.Selections
-	rootCalls := e.schema.RootCalls()
+	rootFields := e.schema.RootFields()
 	result := make([]interface{}, 0)
 
 	for _, selection := range rootSelections {
-		rootCallHandler, ok := rootCalls[selection.Field.Name]
+		rootFieldHandler, ok := rootFields[selection.Field.Name]
 		if !ok {
 			return nil, fmt.Errorf("Root call '%s' is not registered", selection.Field.Name)
 		}
-		partial, err := rootCallHandler.Func(e, selection.Field)
+		partial, err := rootFieldHandler.Func(e, selection.Field)
 		if err != nil {
 			return nil, err
 		}
