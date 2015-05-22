@@ -22,11 +22,6 @@ func New() *Schema {
 	}
 	// self-register
 	s.Register(s)
-	// register special introspection type
-	//i := &GraphQLTypeIntrospector{schema: s}
-	i := &GraphQLTypeIntrospector{}
-	s.Register(i)
-	//s.Register(&GraphQLFieldSpec{})
 	return s
 }
 
