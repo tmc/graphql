@@ -58,7 +58,9 @@ func writeJSONIndent(w io.Writer, data interface{}, indentString string) {
 // ServeHTTP provides an entrypoint into a graphql executor. It pulls the query from
 // the 'q' GET parameter.
 func (h *ExecutorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	//TODO(tmc): reject non-GET requests
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	//TODO(tmc): reject non-GET/OPTIONS requests
 	q := r.URL.Query().Get("q")
 	log.Println("query:", q)
 	operation, err := parser.ParseOperation([]byte(q))
