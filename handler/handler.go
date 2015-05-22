@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/tmc/graphql/executor"
+	"github.com/tmc/graphql/executor/tracer"
 	"github.com/tmc/graphql/parser"
 	"golang.org/x/net/context"
 )
@@ -20,6 +21,7 @@ type Error struct {
 type Result struct {
 	Data  interface{} `json:"data,omitempty"`
 	Error *Error      `json:"error,omitempty"`
+	Trace interface{} `json:"trace_info,omitempty"`
 }
 
 // ExecutorHandler makes a executor.Executor querable via HTTP
@@ -71,13 +73,19 @@ func (h *ExecutorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	// if err := h.validator.Validate(operation); err != nil { writeErr(w, err); return }
 	ctx := context.Background()
+	if w.Header().Get("X-Trace") == "1" {
+		ctx = tracer.NewContext(ctx, tracer.New())
 	}
+
 	data, err := h.executor.HandleOperation(ctx, operation)
 	result := Result{Data: data}
 	if err != nil {
 		w.WriteHeader(500)
 		result.Error = &Error{Message: err.Error()}
 	}
+	if t, ok := tracer.FromContext(ctx); ok {
+		t.Done()
+		result.Trace = t
 	}
 
 	writeJSONIndent(w, result, "  ")
