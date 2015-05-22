@@ -73,9 +73,11 @@ func (h *ExecutorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	}
 	data, err := h.executor.HandleOperation(ctx, operation)
-	result := Result{
-		Data:  data,
-		Error: err,
+	result := Result{Data: data}
+	if err != nil {
+		w.WriteHeader(500)
+		result.Error = &Error{Message: err.Error()}
+	}
 	}
 
 	writeJSONIndent(w, result, "  ")
