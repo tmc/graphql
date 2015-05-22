@@ -5,6 +5,7 @@ import (
 
 	"github.com/tmc/graphql"
 	"github.com/tmc/graphql/executor/resolver"
+	"golang.org/x/net/context"
 )
 
 // Schema represents the registered types that know how to respond to root fields.
@@ -56,7 +57,6 @@ func (s *Schema) RootFields() map[string]*GraphQLFieldSpec {
 }
 
 func (s *Schema) GetTypeInfo(o GraphQLType) GraphQLTypeInfo {
-	panic(s)
 	return s.registeredTypes[o.GraphQLTypeInfo().Name]
 }
 
@@ -78,11 +78,11 @@ func (s *Schema) GraphQLTypeInfo() GraphQLTypeInfo {
 	}
 }
 
-func (s *Schema) handleSchemaCall(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
+func (s *Schema) handleSchemaCall(ctx context.Context, r resolver.Resolver, f *graphql.Field) (interface{}, error) {
 	return s, nil
 }
 
-func (s *Schema) handleTypesCall(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
+func (s *Schema) handleTypesCall(ctx context.Context, r resolver.Resolver, f *graphql.Field) (interface{}, error) {
 	typeNames := make([]string, 0, len(s.registeredTypes))
 	for typeName := range s.registeredTypes {
 		typeNames = append(typeNames, typeName)
@@ -95,7 +95,7 @@ func (s *Schema) handleTypesCall(r resolver.Resolver, f *graphql.Field) (interfa
 	return result, nil
 }
 
-func (s *Schema) handleRootFields(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
+func (s *Schema) handleRootFields(ctx context.Context, r resolver.Resolver, f *graphql.Field) (interface{}, error) {
 	rootFields := []string{}
 	for rootField := range s.rootFields {
 		rootFields = append(rootFields, rootField)

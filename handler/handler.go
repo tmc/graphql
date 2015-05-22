@@ -8,6 +8,7 @@ import (
 
 	"github.com/tmc/graphql/executor"
 	"github.com/tmc/graphql/parser"
+	"golang.org/x/net/context"
 )
 
 // Error represents an error the occured while parsing a graphql query or while generating a response.
@@ -42,6 +43,18 @@ func writeJSON(w io.Writer, data interface{}) {
 	}
 }
 
+func writeJSONIndent(w io.Writer, data interface{}, indentString string) {
+	b, err := json.MarshalIndent(data, "", indentString)
+	if err != nil {
+		log.Println("error encoding json response:", err)
+		writeErr(w, err)
+	}
+	if _, err := w.Write(b); err != nil {
+		log.Println("error writing json response:", err)
+		writeErr(w, err)
+	}
+}
+
 // ServeHTTP provides an entrypoint into a graphql executor. It pulls the query from
 // the 'q' GET parameter.
 func (h *ExecutorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -55,10 +68,13 @@ func (h *ExecutorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// if err := h.validator.Validate(operation); err != nil { writeErr(w, err); return }
-	result, err := h.executor.HandleOperation(operation)
-	if err != nil {
-		writeErr(w, err)
-	} else {
-		writeJSON(w, Result{Data: result})
+	ctx := context.Background()
 	}
+	data, err := h.executor.HandleOperation(ctx, operation)
+	result := Result{
+		Data:  data,
+		Error: err,
+	}
+
+	writeJSONIndent(w, result, "  ")
 }

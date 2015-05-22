@@ -20,6 +20,7 @@ import (
 	"github.com/tmc/graphql/executor/resolver"
 	"github.com/tmc/graphql/handler"
 	"github.com/tmc/graphql/schema"
+	"golang.org/x/net/context"
 )
 
 var listenAddr = flag.String("l", ":8080", "listen addr")
@@ -28,11 +29,11 @@ type nowProvider struct {
 	start time.Time
 }
 
-func (n *nowProvider) now(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
+func (n *nowProvider) now(ctx context.Context, r resolver.Resolver, f *graphql.Field) (interface{}, error) {
 	return time.Now(), nil
 }
 
-func (n *nowProvider) uptime(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
+func (n *nowProvider) uptime(ctx context.Context, r resolver.Resolver, f *graphql.Field) (interface{}, error) {
 	return time.Now().Sub(n.start).Seconds(), nil
 }
 

@@ -7,6 +7,7 @@ import (
 
 	"github.com/tmc/graphql"
 	"github.com/tmc/graphql/schema"
+	"golang.org/x/net/context"
 )
 
 type Executor struct {
@@ -19,7 +20,7 @@ func New(schema *schema.Schema) *Executor {
 	}
 }
 
-func (e *Executor) HandleOperation(o *graphql.Operation) (interface{}, error) {
+func (e *Executor) HandleOperation(ctx context.Context, o *graphql.Operation) (interface{}, error) {
 	rootSelections := o.Selections
 	rootFields := e.schema.RootFields()
 	result := make([]interface{}, 0)
@@ -29,11 +30,11 @@ func (e *Executor) HandleOperation(o *graphql.Operation) (interface{}, error) {
 		if !ok {
 			return nil, fmt.Errorf("Root field '%s' is not registered", selection.Field.Name)
 		}
-		partial, err := rootFieldHandler.Func(e, selection.Field)
+		partial, err := rootFieldHandler.Func(ctx, e, selection.Field)
 		if err != nil {
 			return nil, err
 		}
-		resolved, err := e.Resolve(partial, selection.Field)
+		resolved, err := e.Resolve(ctx, partial, selection.Field)
 		if err != nil {
 			return nil, err
 		}
@@ -49,9 +50,9 @@ func isSlice(value interface{}) bool {
 	return reflect.TypeOf(value).Kind() == reflect.Slice
 }
 
-func (e *Executor) Resolve(partial interface{}, field *graphql.Field) (interface{}, error) {
+func (e *Executor) Resolve(ctx context.Context, partial interface{}, field *graphql.Field) (interface{}, error) {
 	if partial != nil && isSlice(partial) {
-		return e.resolveSlice(partial, field)
+		return e.resolveSlice(ctx, partial, field)
 	}
 	graphQLValue, ok := partial.(schema.GraphQLType)
 	// if we have a scalar we're done
@@ -72,11 +73,11 @@ func (e *Executor) Resolve(partial interface{}, field *graphql.Field) (interface
 		if !ok {
 			return nil, fmt.Errorf("No handler for field '%s' on type '%T'", fieldName, graphQLValue)
 		}
-		partial, err := fieldHandler.Func(e, selection.Field)
+		partial, err := fieldHandler.Func(ctx, e, selection.Field)
 		if err != nil {
 			return nil, err // TODO(tmc) decorate error
 		}
-		resolved, err := e.Resolve(partial, selection.Field)
+		resolved, err := e.Resolve(ctx, partial, selection.Field)
 		if err != nil {
 			return nil, err
 		}
@@ -88,11 +89,11 @@ func (e *Executor) Resolve(partial interface{}, field *graphql.Field) (interface
 	return result, nil
 }
 
-func (e *Executor) resolveSlice(partials interface{}, field *graphql.Field) (interface{}, error) {
+func (e *Executor) resolveSlice(ctx context.Context, partials interface{}, field *graphql.Field) (interface{}, error) {
 	v := reflect.ValueOf(partials)
 	results := make([]interface{}, 0, v.Len())
 	for i := 0; i < v.Len(); i++ {
-		result, err := e.Resolve(v.Index(i).Interface(), field)
+		result, err := e.Resolve(ctx, v.Index(i).Interface(), field)
 		if err != nil {
 			return nil, err
 		}

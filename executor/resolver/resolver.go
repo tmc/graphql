@@ -1,7 +1,10 @@
 package resolver
 
-import "github.com/tmc/graphql"
+import (
+	"github.com/tmc/graphql"
+	"golang.org/x/net/context"
+)
 
 type Resolver interface {
-	Resolve(interface{}, *graphql.Field) (interface{}, error)
+	Resolve(context.Context, interface{}, *graphql.Field) (interface{}, error)
 }

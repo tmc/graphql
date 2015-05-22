@@ -10,6 +10,7 @@ import (
 	"github.com/tmc/graphql/executor/resolver"
 	"github.com/tmc/graphql/parser"
 	"github.com/tmc/graphql/schema"
+	"golang.org/x/net/context"
 )
 
 func ExampleSchema() {
@@ -19,7 +20,7 @@ func ExampleSchema() {
 		fmt.Println(err)
 	}
 	executor := executor.New(s)
-	result, err := executor.HandleOperation(call)
+	result, err := executor.HandleOperation(context.Background(), call)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -42,7 +43,7 @@ func ExampleSchema() {
 
 type nowProvider struct{}
 
-func (n *nowProvider) now(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
+func (n *nowProvider) now(ctx context.Context, r resolver.Resolver, f *graphql.Field) (interface{}, error) {
 	return time.Now(), nil
 }
 
@@ -63,7 +64,7 @@ func ExampleSchemaCustomType() {
 		fmt.Println(err)
 	}
 	executor := executor.New(s)
-	result, err := executor.HandleOperation(call)
+	result, err := executor.HandleOperation(context.Background(), call)
 	if err != nil {
 		fmt.Println(err)
 	}

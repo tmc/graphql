@@ -1,10 +1,9 @@
 package schema
 
 import (
-	"log"
-
 	"github.com/tmc/graphql"
 	"github.com/tmc/graphql/executor/resolver"
+	"golang.org/x/net/context"
 )
 
 type GraphQLTypeIntrospector struct {
@@ -13,8 +12,7 @@ type GraphQLTypeIntrospector struct {
 }
 
 func newIntrospectionField(typeInfo GraphQLTypeInfo) GraphQLFieldFunc {
-	return func(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
-		log.Println("creating introspector for", typeInfo)
+	return func(_ context.Context, r resolver.Resolver, f *graphql.Field) (interface{}, error) {
 		return &GraphQLTypeIntrospector{
 			typeInfo: typeInfo,
 			//schema:   schema,
@@ -41,17 +39,17 @@ func (i *GraphQLTypeIntrospector) GraphQLTypeInfo() GraphQLTypeInfo {
 	})
 }
 
-func (i *GraphQLTypeIntrospector) name(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
+func (i *GraphQLTypeIntrospector) name(_ context.Context, r resolver.Resolver, f *graphql.Field) (interface{}, error) {
 	return i.typeInfo.Name, nil
 }
 
-func (i *GraphQLTypeIntrospector) fields(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
+func (i *GraphQLTypeIntrospector) fields(ctx context.Context, r resolver.Resolver, f *graphql.Field) (interface{}, error) {
 	result := []interface{}{}
 	for _, fieldInfo := range i.typeInfo.Fields {
 		if fieldInfo.IsRoot {
 			continue
 		}
-		res, err := r.Resolve(fieldInfo, f)
+		res, err := r.Resolve(ctx, fieldInfo, f)
 		if err != nil {
 			return nil, err
 		}

@@ -5,10 +5,11 @@ import (
 
 	"github.com/tmc/graphql"
 	"github.com/tmc/graphql/executor/resolver"
+	"golang.org/x/net/context"
 )
 
 // GraphQLFieldFunc is the type that can generate a response from a graphql.Field.
-type GraphQLFieldFunc func(resolver.Resolver, *graphql.Field) (interface{}, error)
+type GraphQLFieldFunc func(context.Context, resolver.Resolver, *graphql.Field) (interface{}, error)
 
 type GraphQLTypeInfo struct {
 	Name        string
@@ -30,21 +31,21 @@ func (g GraphQLTypeInfo) GraphQLTypeInfo() GraphQLTypeInfo {
 			"name": {
 				Name:        "name",
 				Description: "The name of the type.",
-				Func: func(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
-					return r.Resolve(g.Name, f)
+				Func: func(ctx context.Context, r resolver.Resolver, f *graphql.Field) (interface{}, error) {
+					return r.Resolve(ctx, g.Name, f)
 				},
 			},
 			"description": {
 				Name:        "description",
 				Description: "The description of the type.",
-				Func: func(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
-					return r.Resolve(g.Description, f)
+				Func: func(ctx context.Context, r resolver.Resolver, f *graphql.Field) (interface{}, error) {
+					return r.Resolve(ctx, g.Description, f)
 				},
 			},
 			"fields": {
 				Name:        "fields",
 				Description: "The fields associated with the type.",
-				Func: func(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
+				Func: func(ctx context.Context, r resolver.Resolver, f *graphql.Field) (interface{}, error) {
 					fields := make([]string, 0, len(g.Fields))
 					for fieldName := range g.Fields {
 						fields = append(fields, fieldName)
@@ -54,7 +55,7 @@ func (g GraphQLTypeInfo) GraphQLTypeInfo() GraphQLTypeInfo {
 					for _, fieldName := range fields {
 						result = append(result, g.Fields[fieldName])
 					}
-					return r.Resolve(result, f)
+					return r.Resolve(ctx, result, f)
 				},
 			},
 		},
@@ -92,11 +93,11 @@ func (g *GraphQLFieldSpec) GraphQLTypeInfo() GraphQLTypeInfo {
 	}
 }
 
-func (g *GraphQLFieldSpec) name(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
+func (g *GraphQLFieldSpec) name(_ context.Context, r resolver.Resolver, f *graphql.Field) (interface{}, error) {
 	return g.Name, nil
 }
 
-func (g *GraphQLFieldSpec) description(r resolver.Resolver, f *graphql.Field) (interface{}, error) {
+func (g *GraphQLFieldSpec) description(_ context.Context, r resolver.Resolver, f *graphql.Field) (interface{}, error) {
 	return g.Description, nil
 }
 
