@@ -4,5 +4,6 @@ module.exports = {
   module: { loaders: [ {
     test: /\.js$/,
     loader: 'babel-loader?stage=0'
-  } ] }
+  } ] },
+  externals: { 'react': 'React' }
 };
