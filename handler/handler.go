@@ -73,8 +73,11 @@ func (h *ExecutorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	// if err := h.validator.Validate(operation); err != nil { writeErr(w, err); return }
 	ctx := context.Background()
-	if w.Header().Get("X-Trace") == "1" {
-		ctx = tracer.NewContext(ctx, tracer.New())
+	if r.Header.Get("X-Trace-ID") != "" {
+		t, err := tracer.FromRequest(r)
+		if err == nil {
+			ctx = tracer.NewContext(ctx, t)
+		}
 	}
 
 	data, err := h.executor.HandleOperation(ctx, operation)
