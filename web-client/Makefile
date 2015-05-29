@@ -1,2 +1,2 @@
 all:
-	webpack -p --colors --display-modules
+	webpack --colors --display-modules
