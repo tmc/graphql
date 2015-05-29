@@ -62,6 +62,8 @@ func writeJSONIndent(w io.Writer, data interface{}, indentString string) {
 func (h *ExecutorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Trace-Id")
+
 	//TODO(tmc): reject non-GET/OPTIONS requests
 	q := r.URL.Query().Get("q")
 	log.Println("query:", q)
@@ -83,7 +85,7 @@ func (h *ExecutorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	data, err := h.executor.HandleOperation(ctx, operation)
 	result := Result{Data: data}
 	if err != nil {
-		w.WriteHeader(500)
+		w.WriteHeader(400)
 		result.Error = &Error{Message: err.Error()}
 	}
 	if t, ok := tracer.FromContext(ctx); ok {
