@@ -110,9 +110,12 @@
 	    }
 	    this.state = {
 	      endpoint: endpoint,
-	      cannedQueries: ['{ __schema { root_fields { name, description } } }', '{ __types { name, description} }', '{ __types { name, description, fields { name, description } } }', '{ TodoUserClass{ objectId, name, lists:TodoItemListClass_owner { objectId, name, items:TodoItemClass_list { objectId, done, description } } } }']
+	      cannedQueries: ['{ __schema { root_fields { name, description } } }', '{ __types { name, description} }', '{ __types { name, description, fields { name, description } } }', '{ _User { __type__ { fields { name } } } }']
 	    };
 	    this.state.defaultQuery = this.state.cannedQueries[0];
+	    if (window.location.hash.length > 1) {
+	      this.state.defaultQuery = decodeURIComponent(window.location.hash.slice(1));
+	    }
 	  }
 
 	  _inherits(GraphQLWebClientWrapper, _React$Component);
@@ -235,6 +238,7 @@
 	    key: 'onInputChange',
 	    value: function onInputChange(event) {
 	      this.setState({ query: event.target.value });
+	      window.location.hash = encodeURIComponent(this.state.query);
 	      this.queryBackend();
 	    }
 	  }, {
@@ -351,7 +355,7 @@
 	    margin: "5px",
 	    padding: "5px",
 	    float: "left",
-	    height: "300px",
+	    height: "400px",
 	    fontFamily: "Consolas, monospace"
 	  }
 	};

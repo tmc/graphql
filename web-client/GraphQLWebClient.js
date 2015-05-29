@@ -17,6 +17,7 @@ export default class GraphQLWebClient extends React.Component {
   }
   onInputChange(event) {
     this.setState({query: event.target.value});
+    window.location.hash = encodeURIComponent(this.state.query);
     this.queryBackend();
   }
   componentDidMount() {
