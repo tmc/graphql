@@ -1,14 +1,22 @@
 import React from 'react';
+import AceEditor from 'react-ace';
 
 import styles from './styles';
+
+var brace = require('brace');
+require('brace/mode/javascript');
+require('brace/theme/github');
 
 export default class GraphQLQueryInput extends React.Component {
   render() {
     return (
-      <textarea style={styles.textareaStyle}
-        onChange={this.props.onChange}
-        value={this.props.query}
-      />
+      <AceEditor
+          mode="javascript"
+          theme="github"
+          showGutter={false}
+          value={this.props.query}
+          name="input"
+          onChange={this.props.onChange} />
     );
   }
 }

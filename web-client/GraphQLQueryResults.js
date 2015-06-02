@@ -1,15 +1,25 @@
 import React from 'react';
+import AceEditor from 'react-ace';
+
+var brace = require('brace');
+require('brace/mode/javascript');
+require('brace/theme/github');
 
 import styles from './styles';
 
 export default class GraphQLQueryResults extends React.Component {
   render() {
     return (
-      <textarea style={styles.textareaStyle}
-        value={this.props.results}
-        defaultValue={"no response recieved"}
-		readOnly={true}
-	  />
+      <AceEditor
+          mode="javascript"
+          theme="github"
+          showPrintMargin={false}
+          showGutter={false}
+          value={this.props.results}
+          defaultValue={"no response recieved"}
+          name="results"
+          readOnly={true}
+      />
     );
   }
 }
