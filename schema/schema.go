@@ -38,11 +38,17 @@ func (s *Schema) Register(t GraphQLType) {
 }
 
 func WithIntrospectionField(typeInfo GraphQLTypeInfo) GraphQLTypeInfo {
-	introSpectionFunc := newIntrospectionField(typeInfo)
 	typeInfo.Fields["__type__"] = &GraphQLFieldSpec{
 		Name:        "__type__",
 		Description: "Introspection field that exposes field and type information",
-		Func:        introSpectionFunc,
+		Func:        newIntrospectionField(typeInfo),
+	}
+	typeInfo.Fields["__typename__"] = &GraphQLFieldSpec{
+		Name:        "__typename__",
+		Description: "Introspection field that provides the name of the associated type",
+		Func: func(_ context.Context, r resolver.Resolver, f *graphql.Field) (interface{}, error) {
+			return typeInfo.Name, nil
+		},
 	}
 	return typeInfo
 }
@@ -66,8 +72,8 @@ func (s *Schema) GraphQLTypeInfo() GraphQLTypeInfo {
 		Name:        "Schema",
 		Description: "Root schema object",
 		Fields: map[string]*GraphQLFieldSpec{
-			"__schema__":    {"__schema__", "Schema entry root field", s.handleSchemaCall, nil, true},
-			"__types":     {"__types", "Introspection of registered types", s.handleTypesCall, nil, true},
+			"__schema__":  {"__schema__", "Schema entry root field", s.handleSchemaCall, nil, true},
+			"types":       {"types", "Introspection of registered types", s.handleTypesCall, nil, false},
 			"root_fields": {"root_fields", "List fields that are exposed at the root of the GraphQL schema.", s.handleRootFields, nil, false},
 		},
 	}

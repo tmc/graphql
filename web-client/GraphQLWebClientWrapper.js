@@ -18,8 +18,8 @@ export default class GraphQLWebClientWrapper extends React.Component {
       endpoint: endpoint,
       cannedQueries: [
         `{ __schema__ { root_fields { name, description } } }`,
-        `{ __types { name, description} }`,
-        `{ __types { name, description, fields { name, description } } }`,
+        `{ __schema__ { types { name, description } } }`,
+        `{ __schema__ { types { name, description, fields { name, description } } } }`,
         `{ _User { __type__ { fields { name } } } }`
       ]
     };
