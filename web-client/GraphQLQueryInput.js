@@ -16,6 +16,7 @@ export default class GraphQLQueryInput extends React.Component {
           showGutter={false}
           value={this.props.query}
           name="input"
+          wordWrap={true}
           onChange={this.props.onChange} />
     );
   }
