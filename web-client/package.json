@@ -1,4 +1,15 @@
-{"dependencies": {
-	"react": "*",
-	"babel-loader": "*"
-}}
+{
+  "scripts": {
+    "start": "node _liveserver.js"
+  },
+  "dependencies": {
+    "react": "*",
+    "react-ace": "git+https://github.com/tmc/react-ace.git",
+    "babel-loader": "*"
+  },
+  "devDependencies": {
+    "webpack": "*",
+    "react-hot-loader": "*",
+    "webpack-dev-server": "*"
+  }
+}
