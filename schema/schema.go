@@ -91,7 +91,7 @@ func (s *Schema) handleTypesCall(ctx context.Context, r resolver.Resolver, f *gr
 	sort.Strings(typeNames)
 	result := make([]GraphQLTypeInfo, 0, len(typeNames))
 	for _, typeName := range typeNames {
-		result = append(result, s.registeredTypes[typeName])
+		result = append(result, WithIntrospectionField(s.registeredTypes[typeName]))
 	}
 	return result, nil
 }
