@@ -49,6 +49,7 @@ func (n *nowProvider) GraphQLTypeInfo() schema.GraphQLTypeInfo {
 }
 
 func main() {
+	flag.Parse()
 	// create a new schema (which self-registers)
 	now := &nowProvider{time.Now()}
 
