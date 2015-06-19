@@ -21,7 +21,7 @@ func New(schema *schema.Schema) *Executor {
 }
 
 func (e *Executor) HandleOperation(ctx context.Context, o *graphql.Operation) (interface{}, error) {
-	rootSelections := o.Selections
+	rootSelections := o.SelectionSet
 	rootFields := e.schema.RootFields()
 	result := make([]interface{}, 0)
 
@@ -61,13 +61,13 @@ func (e *Executor) Resolve(ctx context.Context, partial interface{}, field *grap
 		return partial, nil
 	}
 	// check against returning object as non-leaf
-	if len(field.Selections) == 0 {
+	if len(field.SelectionSet) == 0 {
 		return nil, fmt.Errorf("Cannot return a '%T' as a leaf", graphQLValue)
 	}
 
 	result := map[string]interface{}{}
 	typeInfo := schema.WithIntrospectionField(graphQLValue.GraphQLTypeInfo())
-	for _, selection := range field.Selections {
+	for _, selection := range field.SelectionSet {
 		fieldName := selection.Field.Name
 		fieldHandler, ok := typeInfo.Fields[fieldName]
 		if !ok {

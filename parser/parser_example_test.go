@@ -20,11 +20,11 @@ func ExampleParse() {
 	// output:
 	// {
 	//  "Type": "query",
-	//  "Selections": [
+	//  "SelectionSet": [
 	//   {
 	//    "Field": {
 	//     "Name": "foo",
-	//     "Selections": [
+	//     "SelectionSet": [
 	//      {
 	//       "Field": {
 	//        "Name": "field"

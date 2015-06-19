@@ -44,14 +44,14 @@ Statement ← _ s:(Operation / FragmentDefinition / TypeDefinition / TypeExtensi
 
 Comment ← '#' [^\n]* { return string(c.text), nil }
 
-Operation ← sels:Selections {
+Operation ← sels:SelectionSet {
 	return graphql.Operation{
 		Type: graphql.OperationQuery,
-		Selections: sels.([]graphql.Selection),
+		SelectionSet: sels.(graphql.SelectionSet),
 	}, nil
 
 } /
-            (ot:OperationType _ on:OperationName _ vds:VariableDefinitions? _ ds:Directives? _ sels:Selections) {
+            (ot:OperationType _ on:OperationName _ vds:VariableDefinitions? _ ds:Directives? _ sels:SelectionSet) {
 	var (
 		varDefs []graphql.VariableDefinition
 		directives []graphql.Directive
@@ -65,7 +65,7 @@ Operation ← sels:Selections {
 	return graphql.Operation{
 		Type: ot.(graphql.OperationType),
 		Name: on.(string),
-		Selections: sels.([]graphql.Selection),
+		SelectionSet: sels.(graphql.SelectionSet),
 		Directives: directives,
 		VariableDefinitions: varDefs,
 	},nil
@@ -97,8 +97,8 @@ VariableDefinition ← _ v:Variable _ ':' _ t:Type _ d:DefaultValue? _ {
 }
 DefaultValue ← '=' v:Value { return v, nil }
 
-Selections ← '{' s:(Selection+) '}' {
-	result := []graphql.Selection{}
+SelectionSet ← '{' s:(Selection+) '}' {
+	result := graphql.SelectionSet{}
 	for _, sel := range ifs(s) {
 		if sel, ok := sel.(graphql.Selection); ok {
 			result = append(result, sel)
@@ -116,9 +116,9 @@ Selection ← (_ f:Field _) {
 	return graphql.Selection{FragmentSpread:&fragmentSpread}, nil
 }
 
-Field ← fa:FieldAlias? _ fn:FieldName _ as:Arguments? _ ds:Directives? _ sels:Selections? {
+Field ← fa:FieldAlias? _ fn:FieldName _ as:Arguments? _ ds:Directives? _ sels:SelectionSet? {
 	var	(
-		selections []graphql.Selection
+		selections graphql.SelectionSet
 		arguments []graphql.Argument
 		directives []graphql.Directive
 		fieldAlias string
@@ -127,7 +127,7 @@ Field ← fa:FieldAlias? _ fn:FieldName _ as:Arguments? _ ds:Directives? _ sels:
 		fieldAlias = fa.(string)
 	}
 	if sels != nil {
-		selections = sels.([]graphql.Selection)
+		selections = sels.(graphql.SelectionSet)
 	}
 	if as != nil {
 		arguments = as.([]graphql.Argument)
@@ -139,7 +139,7 @@ Field ← fa:FieldAlias? _ fn:FieldName _ as:Arguments? _ ds:Directives? _ sels:
 		Name: fn.(string),
 		Alias: fieldAlias,
 		Arguments: arguments,
-		Selections: selections,
+		SelectionSet: selections,
 		Directives: directives,
 	}, nil
 }
@@ -178,7 +178,7 @@ FragmentSpread ←  "..." fn:FragmentName ds:Directives? {
 		Directives: directives,
 	}, nil	
 }
-FragmentDefinition ← "fragment" _ t:Type _ fn:FragmentName _ ds:Directives? _ sels:Selections _ {
+FragmentDefinition ← "fragment" _ t:Type _ fn:FragmentName _ ds:Directives? _ sels:SelectionSet _ {
 	var directives []graphql.Directive
 	if ds != nil {
 		directives = ds.([]graphql.Directive)
@@ -186,7 +186,7 @@ FragmentDefinition ← "fragment" _ t:Type _ fn:FragmentName _ ds:Directives? _ 
 	return graphql.FragmentDefinition{
 		Name: fn.(string),
 		Type: t.(graphql.Type),
-		Selections: sels.([]graphql.Selection),
+		SelectionSet: sels.(graphql.SelectionSet),
 		Directives: directives,
 	}, nil
 }

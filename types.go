@@ -26,7 +26,7 @@ type Document struct {
 type Operation struct {
 	Type                OperationType        `json:",omitempty"`
 	Name                string               `json:",omitempty"`
-	Selections          []Selection          `json:",omitempty"`
+	SelectionSet        SelectionSet         `json:",omitempty"`
 	VariableDefinitions []VariableDefinition `json:",omitempty"`
 	Directives          []Directive          `json:",omitempty"`
 }
@@ -50,11 +50,11 @@ func (s *Selection) String() string {
 // A Field is one of the most important concepts in GraphQL. Fields specify what
 // parts of data you would like to select.
 type Field struct {
-	Name       string      `json:",omitempty"`
-	Arguments  Arguments   `json:",omitempty"`
-	Selections Selections  `json:",omitempty"`
-	Alias      string      `json:",omitempty"`
-	Directives []Directive `json:",omitempty"`
+	Name         string       `json:",omitempty"`
+	Arguments    Arguments    `json:",omitempty"`
+	SelectionSet SelectionSet `json:",omitempty"`
+	Alias        string       `json:",omitempty"`
+	Directives   []Directive  `json:",omitempty"`
 }
 
 // FragmentSpread is a reference to a QueryFragment elsewhere in an Operation.
@@ -72,17 +72,17 @@ type Argument struct {
 // Arguments is a collection of Argument values
 type Arguments []Argument
 
-// Selections is a collection of Selection
-type Selections []Selection
+// SelectionSet is a collection of Selection
+type SelectionSet []Selection
 
 // Fragments
 
 // FragmentDefinition defines a Query Fragment
 type FragmentDefinition struct {
-	Name       string
-	Type       Type
-	Selections []Selection
-	Directives []Directive `json:",omitempty"`
+	Name         string
+	Type         Type
+	SelectionSet SelectionSet
+	Directives   []Directive `json:",omitempty"`
 }
 
 // Type system

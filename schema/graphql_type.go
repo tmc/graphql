@@ -80,6 +80,7 @@ type GraphQLFieldSpec struct {
 	Func        GraphQLFieldFunc
 	Arguments   []graphql.Argument // Describes any arguments the field accepts
 	IsRoot      bool               // If true, this field should be exposed at the root of the GraphQL schema
+	// TODO(tmc) add isDeprecated/deprecationReason
 }
 
 func (g *GraphQLFieldSpec) GraphQLTypeInfo() GraphQLTypeInfo {
