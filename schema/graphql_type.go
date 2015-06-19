@@ -62,17 +62,6 @@ func (g GraphQLTypeInfo) GraphQLTypeInfo() GraphQLTypeInfo {
 	}
 }
 
-type Scalar struct {
-	Value interface{}
-}
-
-func (s Scalar) GraphQLTypeInfo() GraphQLTypeInfo {
-	return GraphQLTypeInfo{
-		Name:        "Scalar",
-		Description: "A scalar value",
-	}
-}
-
 // GraphQLFieldSpec describes a field associated with a type in a GraphQL schema.
 type GraphQLFieldSpec struct {
 	Name        string
