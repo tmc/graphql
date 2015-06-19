@@ -34,7 +34,7 @@ func ExampleSchema() {
 	//     "name": "__schema__"
 	//    },
 	//    {
-	//     "name": "__types"
+	//     "name": "__type"
 	//    }
 	//   ]
 	//  }
@@ -78,7 +78,7 @@ func ExampleSchemaCustomType() {
 	//     "name": "__schema__"
 	//    },
 	//    {
-	//     "name": "__types"
+	//     "name": "__type"
 	//    },
 	//    {
 	//     "name": "now"

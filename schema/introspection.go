@@ -8,7 +8,6 @@ import (
 
 type GraphQLTypeIntrospector struct {
 	typeInfo GraphQLTypeInfo
-	//schema   *Schema
 }
 
 func newIntrospectionField(typeInfo GraphQLTypeInfo) GraphQLFieldFunc {

@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/tmc/graphql"
@@ -73,6 +74,7 @@ func (s *Schema) GraphQLTypeInfo() GraphQLTypeInfo {
 		Description: "Root schema object",
 		Fields: map[string]*GraphQLFieldSpec{
 			"__schema__":  {"__schema__", "Schema entry root field", s.handleSchemaCall, nil, true},
+			"__type":      {"__type", "Query registered types by name", s.handleTypeCall, nil, true},
 			"types":       {"types", "Introspection of registered types", s.handleTypesCall, nil, false},
 			"root_fields": {"root_fields", "List fields that are exposed at the root of the GraphQL schema.", s.handleRootFields, nil, false},
 		},
@@ -94,6 +96,19 @@ func (s *Schema) handleTypesCall(ctx context.Context, r resolver.Resolver, f *gr
 		result = append(result, WithIntrospectionField(s.registeredTypes[typeName]))
 	}
 	return result, nil
+}
+
+func (s *Schema) handleTypeCall(ctx context.Context, r resolver.Resolver, f *graphql.Field) (interface{}, error) {
+	name, ok := f.Arguments.Get("name")
+	if !ok {
+		return nil, fmt.Errorf("required argument 'name' not provided")
+	}
+	for typeName := range s.registeredTypes {
+		if name == typeName {
+			return WithIntrospectionField(s.registeredTypes[typeName]), nil
+		}
+	}
+	return nil, fmt.Errorf("type of name '%v' not registered", name)
 }
 
 func (s *Schema) handleRootFields(ctx context.Context, r resolver.Resolver, f *graphql.Field) (interface{}, error) {

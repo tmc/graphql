@@ -80,6 +80,15 @@ type Argument struct {
 // Arguments is a collection of Argument values
 type Arguments []Argument
 
+func (a Arguments) Get(name string) (interface{}, bool) {
+	for _, arg := range a {
+		if arg.Name == name {
+			return arg.Value, true
+		}
+	}
+	return nil, false
+}
+
 // SelectionSet is a collection of Selection
 type SelectionSet []Selection
 
