@@ -32929,7 +32929,7 @@
 	    }
 	    this.state = {
 	      endpoint: endpoint,
-	      cannedQueries: ['{ __schema__ { root_fields { name, description } } }', '{ __types { name, description} }', '{ __types { name, description, fields { name, description } } }', '{ _User { __type__ { fields { name } } } }']
+	      cannedQueries: ['{ __schema { root_fields { name, description } } }', '{ __types { name, description} }', '{ __types { name, description, fields { name, description } } }', '{ _User { __type__ { fields { name } } } }']
 	    };
 	    this.state.defaultQuery = this.state.cannedQueries[0];
 	    if (window.location.hash.length > 1) {

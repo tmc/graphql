@@ -73,7 +73,7 @@ func (s *Schema) GraphQLTypeInfo() GraphQLTypeInfo {
 		Name:        "Schema",
 		Description: "Root schema object",
 		Fields: map[string]*GraphQLFieldSpec{
-			"__schema__":  {"__schema__", "Schema entry root field", s.handleSchemaCall, nil, true},
+			"__schema":  {"__schema", "Schema entry root field", s.handleSchemaCall, nil, true},
 			"__type":      {"__type", "Query registered types by name", s.handleTypeCall, nil, true},
 			"types":       {"types", "Introspection of registered types", s.handleTypesCall, nil, false},
 			"root_fields": {"root_fields", "List fields that are exposed at the root of the GraphQL schema.", s.handleRootFields, nil, false},

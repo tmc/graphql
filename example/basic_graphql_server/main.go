@@ -3,8 +3,8 @@
 // Example:
 //  $ go get github.com/tmc/graphql/example/basic_graphql_server
 //  $ basic_graphql_server &
-//  $ curl -g 'http://localhost:8080/?q={__schema__{root_fields{name,description}}}'
-//  {"data":[{"root_fields":[{"description": "Schema entry root field","name":"__schema__"}]}}]
+//  $ curl -g 'http://localhost:8080/?q={__schema{root_fields{name,description}}}'
+//  {"data":[{"root_fields":[{"description": "Schema entry root field","name":"__schema"}]}}]
 //
 // Here we see the server showing the available root fields ("schema").
 package main
