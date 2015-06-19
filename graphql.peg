@@ -5,10 +5,10 @@ import "github.com/tmc/graphql"
 
 // helpers
 func ifs(v interface{}) []interface{} {
-    if v == nil {
-        return nil
-    }
-    return v.([]interface{})
+	if v == nil {
+		return nil
+	}
+	return v.([]interface{})
 }
 }
 
@@ -36,10 +36,14 @@ Document ← stmts:Statement+ EOF {
 		}
 	}
 	return result, nil
+} / . {
+    return nil, errors.New("no graphql document found")
 }
 
 Statement ← _ s:(Operation / FragmentDefinition / TypeDefinition / TypeExtension / EnumDefinition / Comment) _ {
 	return s, nil
+} / . {
+    panic(errors.New("expected top-level statement"))
 }
 
 Comment ← '#' [^\n]* { return string(c.text), nil }
@@ -114,6 +118,9 @@ Selection ← (_ f:Field _) {
 } / (_ fs:FragmentSpread _) {
 	fragmentSpread := fs.(graphql.FragmentSpread)
 	return graphql.Selection{FragmentSpread:&fragmentSpread}, nil
+} / (_ fs:InlineFragment _) {
+	inlineFragment := fs.(graphql.InlineFragment)
+	return graphql.Selection{InlineFragment:&inlineFragment}, nil
 }
 
 Field ← fa:FieldAlias? _ fn:FieldName _ as:Arguments? _ ds:Directives? _ sels:SelectionSet? {
@@ -178,14 +185,27 @@ FragmentSpread ←  "..." fn:FragmentName ds:Directives? {
 		Directives: directives,
 	}, nil	
 }
-FragmentDefinition ← "fragment" _ t:Type _ fn:FragmentName _ ds:Directives? _ sels:SelectionSet _ {
+
+InlineFragment ←  "..." _ "on" _ tn:TypeName _ ds:Directives? _ sels:SelectionSet _ {
+	var directives []graphql.Directive
+	if ds != nil {
+		directives = ds.([]graphql.Directive)
+	}
+	return graphql.InlineFragment{
+		TypeCondition: tn.(string),
+		Directives: directives,
+		SelectionSet: sels.(graphql.SelectionSet),
+	}, nil	
+}
+
+FragmentDefinition ← "fragment" _ fn:FragmentName _ "on" _ tn:TypeName  _ ds:Directives? _ sels:SelectionSet _ {
 	var directives []graphql.Directive
 	if ds != nil {
 		directives = ds.([]graphql.Directive)
 	}
 	return graphql.FragmentDefinition{
 		Name: fn.(string),
-		Type: t.(graphql.Type),
+		TypeCondition: tn.(string),
 		SelectionSet: sels.(graphql.SelectionSet),
 		Directives: directives,
 	}, nil

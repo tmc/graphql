@@ -10,7 +10,12 @@ var shouldParse = []string{
 	`# "me" usually represents the currently logged in user.
 	query getMe {
 	  me
-	}`,
+	}
+	# "user" represents one of many users in a graph of data.
+	query getZuck {
+	  user(id: 4)
+	}
+	`,
 	`query getFoobar {
 	  user(id: 42) {
 	      id,
@@ -40,7 +45,7 @@ var shouldParse = []string{
 	  }
 	}`,
 	`{
-	  node(username: "zuck") @expect: User {
+	  node(username: "ruck") @expect: User {
 		friends { count }
 	  }
 	}`,
@@ -59,23 +64,52 @@ var shouldParse = []string{
 	  }
 	}
 
-	fragment User friendFields {
+	fragment friendFields on User {
 	  id,
 	  name,
 	  profilePic(size: 50)
 	}`,
-	`query getCommentThread($threadID: String) {
-	  thread(id: $threadID) {
-		...threadComments
+	`query withNestedFragments
+	{
+	  user(id: 4) {
+		friends(first: 10) { ...friendFields }
+		mutualFriends(first: 10) { ...friendFields }
 	  }
 	}
-	fragment Comment ThreadComments @maxDepth: 5 {
-	  comments(first: 5) {
-		nodes {
-		  author {
-			profilePic
-		  },
-		  ...ThreadComments
+
+	fragment friendFields on User {
+	  id
+	  name
+	  ...standardProfilePic
+	}
+
+	fragment standardProfilePic on User {
+	  profilePic(size: 50)
+	}`,
+	`query FragmentTyping
+	{
+	  profiles(handles: ["zuck", "cocacola"]) {
+		handle
+		...userFragment
+		...pageFragment
+	  }
+	}
+
+	fragment userFragment on User {
+	  friends { count }
+	}
+
+	fragment pageFragment on Page {
+	  likers { count }
+	}`,
+	`query AnonymousFragmentTyping {
+	  profiles(handles: ["zuck", "cocacola"]) {
+		handle
+		... on User {
+		  friends { count }
+		}
+		... on Page {
+		  likers { count }
 		}
 	  }
 	}`,

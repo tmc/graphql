@@ -36,10 +36,11 @@ func (o *Operation) String() string {
 	return string(j)
 }
 
-// A Selection is either a Field or a FragmentSpread
+// A Selection is either a Field, a FragmentSpread, or an InlineFragment
 type Selection struct {
 	Field          *Field          `json:",omitempty"`
 	FragmentSpread *FragmentSpread `json:",omitempty"`
+	InlineFragment *InlineFragment `json:",omitempty"`
 }
 
 func (s *Selection) String() string {
@@ -63,6 +64,13 @@ type FragmentSpread struct {
 	Directives []Directive `json:",omitempty"`
 }
 
+// InlineFragment is used in-line to apply a type condition within a selection.
+type InlineFragment struct {
+	TypeCondition string      `json:",omitempty"`
+	Directives    []Directive `json:",omitempty"`
+	SelectionSet  SelectionSet
+}
+
 // Argument is an argument to a Field Call.
 type Argument struct {
 	Name  string
@@ -79,10 +87,10 @@ type SelectionSet []Selection
 
 // FragmentDefinition defines a Query Fragment
 type FragmentDefinition struct {
-	Name         string
-	Type         Type
-	SelectionSet SelectionSet
-	Directives   []Directive `json:",omitempty"`
+	Name          string
+	TypeCondition string
+	SelectionSet  SelectionSet
+	Directives    []Directive `json:",omitempty"`
 }
 
 // Type system
