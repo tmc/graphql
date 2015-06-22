@@ -11,16 +11,30 @@ var divStyle = {
   width: "49%",
   border: "1px dotted #ccc"
 };
+var divStyleQuerying = {
+  margin: "auto",
+  width: "49%",
+  border: "1px solid #aaa"
+};
+var divStylePreQuerying = {
+  margin: "auto",
+  width: "49%",
+  border: "1px solid #000"
+};
+var styles = [divStyle, divStylePreQuerying, divStyleQuerying];
+
 
 export default class GraphQLWebClient extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       query: this.props.defaultQuery,
+      queryState: 0,
       response: `(no response received yet)`
     };
     this.queryEvent = null;
-    this.queryDelay = 100;
+    this.queryDelay = 500;
+    this.xhr = null;
   }
   onInputChange(value) {
     window.location.hash = value;
@@ -35,8 +49,11 @@ export default class GraphQLWebClient extends React.Component {
     this.queryBackend();
   }
   queryBackend() {
+    this.setState({queryState: 1});
     if (this.queryEvent !== null) { clearTimeout(this.queryEvent); }
+    if (this.xhr !== null) { this.xhr.abort(); }
     this.queryEvent = setTimeout(() => {
+      this.setState({queryState: 2});
       var xhr = new XMLHttpRequest();
       xhr.open('get', `${this.props.endpoint}?q=${this.state.query}`, true);
       xhr.setRequestHeader('X-Trace-Id', '1');
@@ -45,8 +62,10 @@ export default class GraphQLWebClient extends React.Component {
       }
       xhr.onload = () => {
           this.setState({response: xhr.responseText});
+          this.setState({queryState: 0});
       };
       xhr.send();
+      this.xhr = xhr;
     }, this.queryDelay);
   }
   render() {
@@ -55,7 +74,7 @@ export default class GraphQLWebClient extends React.Component {
        <div style={divStyle}>
        <GraphQLQueryInput query={this.state.query} onChange={this.onInputChange.bind(this)} />
        </div>
-       <div style={divStyle}>
+       <div style={styles[this.state.queryState]}>
        <GraphQLQueryResults results={this.state.response} />
        </div>
      </div>
