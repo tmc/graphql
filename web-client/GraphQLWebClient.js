@@ -40,6 +40,9 @@ export default class GraphQLWebClient extends React.Component {
       var xhr = new XMLHttpRequest();
       xhr.open('get', `${this.props.endpoint}?q=${this.state.query}`, true);
       xhr.setRequestHeader('X-Trace-Id', '1');
+      if (this.props.showParseResult) {
+        xhr.setRequestHeader('X-GraphQL-Only-Parse', '1');
+      }
       xhr.onload = () => {
           this.setState({response: xhr.responseText});
       };

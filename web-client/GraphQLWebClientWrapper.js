@@ -16,6 +16,7 @@ export default class GraphQLWebClientWrapper extends React.Component {
     }
     this.state = {
       endpoint: endpoint,
+      showParseResult: false,
       cannedQueries: [
         `{ __schema { root_fields { name, description } } }`,
         `{ __schema { types { name, description } } }`,
@@ -29,8 +30,11 @@ export default class GraphQLWebClientWrapper extends React.Component {
       this.state.defaultQuery = decodeURIComponent(window.location.hash.slice(1));
     }
   }
-  onChange(event) {
+  onChangeEndpoint(event) {
     this.setState({endpoint: event.target.value});
+  }
+  onChangeShowParseResult(event) {
+    this.setState({showParseResult: event.target.checked});
   }
   onCannedQueryClicked(event) {
     this.setState({defaultQuery: event.target.text});
@@ -45,11 +49,15 @@ export default class GraphQLWebClientWrapper extends React.Component {
       <div>
         <strong>github.com/tmc/graphql - web-client</strong>
         <p><label>endpoint:</label>
-        <input size="50" defaultValue={this.state.endpoint} onChange={this.onChange.bind(this)} />
+        <input size="50" defaultValue={this.state.endpoint} onChange={this.onChangeEndpoint.bind(this)} />
+        </p>
+        <p><label>show parse result? </label>
+        <input type="checkbox" onChange={this.onChangeShowParseResult.bind(this)} />
         </p>
         <hr/>
         <GraphQLWebClient
           defaultQuery={this.state.defaultQuery}
+          showParseResult={this.state.showParseResult}
           endpoint={this.state.endpoint}
         />
         <ul style={styles.clear}>
