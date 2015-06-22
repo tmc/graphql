@@ -13,6 +13,7 @@ export default class GraphQLQueryResults extends React.Component {
           theme="github"
           showPrintMargin={false}
           showGutter={false}
+          width="100%"
           value={this.props.results}
           defaultValue={"no response recieved"}
           name="results"

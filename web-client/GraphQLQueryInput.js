@@ -9,11 +9,10 @@ export default class GraphQLQueryInput extends React.Component {
   render() {
     return (
       <AceEditor
-          mode="javascript"
           theme="github"
-          showGutter={false}
           value={this.props.query}
           name="input"
+          width="100%"
           wordWrap={true}
           onChange={this.props.onChange} />
     );

@@ -1136,6 +1136,8 @@
 	    }
 	    this.state = {
 	      endpoint: endpoint,
+	      runAutomatically: true,
+	      queryState: 0,
 	      showParseResult: false,
 	      cannedQueries: ['{ __schema { root_fields { name, description } } }', '{ __schema { types { name, description } } }', '{ __schema { types { name, description, fields { name, description } } } }', '{ _User { __type__ { fields { name } } } }', '{ _User { objectId } }']
 	    };
@@ -1158,9 +1160,25 @@
 	      this.setState({ showParseResult: event.target.checked });
 	    }
 	  }, {
+	    key: 'onChangeRunAutomatically',
+	    value: function onChangeRunAutomatically(event) {
+	      console.log('ocra:', event.target.checked);
+	      this.setState({ runAutomatically: event.target.checked });
+	    }
+	  }, {
 	    key: 'onCannedQueryClicked',
 	    value: function onCannedQueryClicked(event) {
 	      this.setState({ defaultQuery: event.target.text });
+	    }
+	  }, {
+	    key: 'onChildQueryStateChange',
+	    value: function onChildQueryStateChange(newState) {
+	      this.setState({ queryState: newState });
+	    }
+	  }, {
+	    key: 'onClickQuery',
+	    value: function onClickQuery(state) {
+	      this.refs.client.queryBackend();
 	    }
 	  }, {
 	    key: 'render',
@@ -1178,6 +1196,12 @@
 	          )
 	        );
 	      });
+	      var buttonLabel = 'Run Query';
+	      if (this.refs.client) {
+	        console.log(this.refs.client);
+	        buttonLabel = ['Run Query', 'Waiting for input', 'Running Query'][this.state.queryState];
+	        console.log(buttonLabel);
+	      }
 	      return _react2['default'].createElement(
 	        'div',
 	        null,
@@ -1191,25 +1215,49 @@
 	          null,
 	          _react2['default'].createElement(
 	            'label',
-	            null,
+	            { htmlFor: '_graphql_endpoint' },
 	            'endpoint:'
 	          ),
-	          _react2['default'].createElement('input', { size: '50', defaultValue: this.state.endpoint, onChange: this.onChangeEndpoint.bind(this) })
+	          _react2['default'].createElement('input', { id: '_graphql_endpoint', size: '50', defaultValue: this.state.endpoint, onChange: this.onChangeEndpoint.bind(this) })
 	        ),
 	        _react2['default'].createElement(
 	          'p',
 	          null,
 	          _react2['default'].createElement(
 	            'label',
-	            null,
-	            'show parse result? '
+	            { htmlFor: '_graphql_run_auto' },
+	            'run automatically? '
 	          ),
-	          _react2['default'].createElement('input', { type: 'checkbox', onChange: this.onChangeShowParseResult.bind(this) })
+	          _react2['default'].createElement('input', { id: '_graphql_run_auto', type: 'checkbox', onChange: this.onChangeRunAutomatically.bind(this), defaultChecked: this.state.runAutomatically }),
+	          _react2['default'].createElement(
+	            'span',
+	            null,
+	            ' '
+	          ),
+	          _react2['default'].createElement(
+	            'label',
+	            { htmlFor: '_graphql_show_parse' },
+	            'just show parse result?'
+	          ),
+	          _react2['default'].createElement('input', { id: '_graphql_show_parse', type: 'checkbox', onChange: this.onChangeShowParseResult.bind(this) }),
+	          _react2['default'].createElement(
+	            'span',
+	            null,
+	            ' '
+	          ),
+	          _react2['default'].createElement(
+	            'button',
+	            { className: 'btn btn-primary', disabled: this.state.runAutomatically, onClick: this.onClickQuery.bind(this) },
+	            buttonLabel
+	          )
 	        ),
 	        _react2['default'].createElement('hr', null),
 	        _react2['default'].createElement(_GraphQLWebClient2['default'], {
+	          ref: 'client',
 	          defaultQuery: this.state.defaultQuery,
 	          showParseResult: this.state.showParseResult,
+	          autoRun: this.state.runAutomatically,
+	          onQueryState: this.onChildQueryStateChange.bind(this),
 	          endpoint: this.state.endpoint
 	        }),
 	        _react2['default'].createElement(
@@ -1307,7 +1355,9 @@
 	    value: function onInputChange(value) {
 	      window.location.hash = value;
 	      this.setState({ query: value });
-	      this.queryBackend();
+	      if (this.props.autoRun) {
+	        this.queryBackend();
+	      }
 	    }
 	  }, {
 	    key: 'componentDidMount',
@@ -1317,15 +1367,26 @@
 	  }, {
 	    key: 'componentWillReceiveProps',
 	    value: function componentWillReceiveProps(nextProps) {
-	      this.state.query = nextProps.defaultQuery;
-	      this.queryBackend();
+	      if (nextProps.defaultQuery !== this.props.defaultQuery) {
+	        this.setState({ query: nextProps.defaultQuery });
+	      }
+	      if (!this.props.autoRun && nextProps.autoRun) {
+	        this.queryBackend();
+	      }
+	    }
+	  }, {
+	    key: 'setQueryState',
+	    value: function setQueryState(newState) {
+	      if (this.props.onQueryState) {
+	        this.props.onQueryState(newState);
+	      }
+	      this.setState({ queryState: newState });
 	    }
 	  }, {
 	    key: 'queryBackend',
 	    value: function queryBackend() {
 	      var _this = this;
 
-	      this.setState({ queryState: 1 });
 	      var queryDelay = this.queryDelay;
 	      if (this.queryEvent !== null) {
 	        clearTimeout(this.queryEvent);
@@ -1335,17 +1396,18 @@
 	      } else {
 	        queryDelay = 0;
 	      }
+	      this.setQueryState(1);
 	      this.queryEvent = setTimeout(function () {
-	        _this.setState({ queryState: 2 });
+	        _this.setQueryState(2);
 	        var xhr = new XMLHttpRequest();
-	        xhr.open('get', '' + _this.props.endpoint + '?q=' + _this.state.query, true);
+	        xhr.open('get', '' + _this.props.endpoint + '?q=' + encodeURIComponent(_this.state.query), true);
 	        xhr.setRequestHeader('X-Trace-Id', '1');
 	        if (_this.props.showParseResult) {
 	          xhr.setRequestHeader('X-GraphQL-Only-Parse', '1');
 	        }
 	        xhr.onload = function () {
 	          _this.setState({ response: xhr.responseText });
-	          _this.setState({ queryState: 0 });
+	          _this.setQueryState(0);
 	        };
 	        xhr.send();
 	        _this.xhr = xhr;
@@ -1422,11 +1484,10 @@
 	    key: 'render',
 	    value: function render() {
 	      return _react2['default'].createElement(_reactAce2['default'], {
-	        mode: 'javascript',
 	        theme: 'github',
-	        showGutter: false,
 	        value: this.props.query,
 	        name: 'input',
+	        width: '100%',
 	        wordWrap: true,
 	        onChange: this.props.onChange });
 	    }
@@ -1487,6 +1548,7 @@
 	        theme: 'github',
 	        showPrintMargin: false,
 	        showGutter: false,
+	        width: '100%',
 	        value: this.props.results,
 	        defaultValue: 'no response recieved',
 	        name: 'results',

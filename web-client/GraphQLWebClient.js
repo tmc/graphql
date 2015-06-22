@@ -39,17 +39,24 @@ export default class GraphQLWebClient extends React.Component {
   onInputChange(value) {
     window.location.hash = value;
     this.setState({query: value});
-    this.queryBackend();
+    if (this.props.autoRun) {this.queryBackend(); }
   }
   componentDidMount() {
     this.queryBackend();
   }
   componentWillReceiveProps(nextProps) {
-    this.state.query = nextProps.defaultQuery;
-    this.queryBackend();
+    if (nextProps.defaultQuery !== this.props.defaultQuery) {
+      this.setState({query: nextProps.defaultQuery});
+    }
+    if (!this.props.autoRun && nextProps.autoRun) {this.queryBackend(); }
+  }
+  setQueryState(newState) {
+    if (this.props.onQueryState) {
+      this.props.onQueryState(newState);
+    }
+    this.setState({queryState: newState});
   }
   queryBackend() {
-    this.setState({queryState: 1});
     var queryDelay = this.queryDelay;
     if (this.queryEvent !== null) { clearTimeout(this.queryEvent); }
     if (this.xhr !== null) {
@@ -57,17 +64,18 @@ export default class GraphQLWebClient extends React.Component {
     } else {
       queryDelay = 0;
     }
+    this.setQueryState(1);
     this.queryEvent = setTimeout(() => {
-      this.setState({queryState: 2});
+      this.setQueryState(2);
       var xhr = new XMLHttpRequest();
-      xhr.open('get', `${this.props.endpoint}?q=${this.state.query}`, true);
+      xhr.open('get', `${this.props.endpoint}?q=${encodeURIComponent(this.state.query)}`, true);
       xhr.setRequestHeader('X-Trace-Id', '1');
       if (this.props.showParseResult) {
         xhr.setRequestHeader('X-GraphQL-Only-Parse', '1');
       }
       xhr.onload = () => {
           this.setState({response: xhr.responseText});
-          this.setState({queryState: 0});
+          this.setQueryState(0);
       };
       xhr.send();
       this.xhr = xhr;
