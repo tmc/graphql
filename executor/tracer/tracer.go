@@ -14,8 +14,9 @@ import (
 type Tracer struct {
 	ID                 uint64
 	startTime, endTime time.Time
-	Duration           time.Duration
+	Duration           time.Duration `json:"-"`
 	DurationMicros     int64
+	DurationMillis     int64
 
 	mu      sync.Mutex
 	Queries int
@@ -51,6 +52,7 @@ func (t *Tracer) Done() {
 	t.endTime = time.Now()
 	t.Duration = t.endTime.Sub(t.startTime)
 	t.DurationMicros = t.Duration.Nanoseconds() / 1000
+	t.DurationMillis = t.Duration.Nanoseconds() / 1000000
 }
 
 // The key type is unexported to prevent collisions with context keys defined in

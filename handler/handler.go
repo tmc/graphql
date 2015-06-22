@@ -20,9 +20,9 @@ type Error struct {
 
 // Result represents a graphql query result.
 type Result struct {
+	Trace interface{} `json:"__trace_info,omitempty"`
 	Data  interface{} `json:"data,omitempty"`
 	Error *Error      `json:"error,omitempty"`
-	Trace interface{} `json:"trace_info,omitempty"`
 }
 
 // ExecutorHandler makes a executor.Executor querable via HTTP
