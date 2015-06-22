@@ -17,6 +17,7 @@ type Tracer struct {
 	Duration           time.Duration `json:"-"`
 	DurationMicros     int64
 	DurationMillis     int64
+	Extra              map[string]interface{} `json:",omitempty"`
 
 	mu      sync.Mutex
 	Queries int
@@ -46,6 +47,12 @@ func (t *Tracer) IncQueries(n int) int {
 	defer t.mu.Unlock()
 	t.Queries += n
 	return t.Queries
+}
+
+func (t *Tracer) WithLock(fn func(*Tracer)) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	fn(t)
 }
 
 func (t *Tracer) Done() {
