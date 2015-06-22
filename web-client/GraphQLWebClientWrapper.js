@@ -20,7 +20,8 @@ export default class GraphQLWebClientWrapper extends React.Component {
         `{ __schema { root_fields { name, description } } }`,
         `{ __schema { types { name, description } } }`,
         `{ __schema { types { name, description, fields { name, description } } } }`,
-        `{ _User { __type__ { fields { name } } } }`
+        `{ _User { __type__ { fields { name } } } }`,
+        `{ _User { objectId } }`
       ]
     };
     this.state.defaultQuery = this.state.cannedQueries[0];
@@ -42,9 +43,10 @@ export default class GraphQLWebClientWrapper extends React.Component {
     });
     return (
       <div>
-        <h1>graphql client</h1>
-        <label>graphql endpoint:</label>
+        <strong>github.com/tmc/graphql - web-client</strong>
+        <p><label>endpoint:</label>
         <input size="50" defaultValue={this.state.endpoint} onChange={this.onChange.bind(this)} />
+        </p>
         <hr/>
         <GraphQLWebClient
           defaultQuery={this.state.defaultQuery}
