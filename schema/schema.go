@@ -44,8 +44,8 @@ func WithIntrospectionField(typeInfo GraphQLTypeInfo) GraphQLTypeInfo {
 		Description: "Introspection field that exposes field and type information",
 		Func:        newIntrospectionField(typeInfo),
 	}
-	typeInfo.Fields["__typename__"] = &GraphQLFieldSpec{
-		Name:        "__typename__",
+	typeInfo.Fields["__typename"] = &GraphQLFieldSpec{
+		Name:        "__typename",
 		Description: "Introspection field that provides the name of the associated type",
 		Func: func(_ context.Context, r resolver.Resolver, f *graphql.Field) (interface{}, error) {
 			return typeInfo.Name, nil
