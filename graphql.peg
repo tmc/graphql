@@ -245,8 +245,27 @@ EnumValue ← tn:TypeName '.' v:EnumValueName {
 		Value: v.(string),
 	}, nil 
 }
-Array ← '[' Value* ']'
-Object ← '{' Property+ '}'
+
+Array ← '[' values:Value* ']' {
+    sl := ifs(values)
+    result := make([]interface{}, 0, len(sl))
+    for _, p := range sl {
+	result = append(result, p)
+    }
+    return result, nil
+}
+
+Object ← '{' ps:Property+ '}' {
+    result := make(map[string]interface{})
+    for _, p := range ifs(ps) {
+	prop, ok := p.(graphql.Argument)
+	if !ok {
+	    return nil, fmt.Errorf("expected Property, got %#v", p)
+	}
+	result[prop.Name] = prop.Value
+    }
+    return result, nil
+}
 
 Variable ← vn:VariableName '.' pn:PropertyName {
 	return graphql.Variable{
@@ -266,8 +285,10 @@ VariableName ← '$' [0-9a-z_]i+ {
 //
 // VariablePropertySelection ← Variable '.' PropertyName
 
-Property ← PropertyName ':' Value
-PropertyName ← Name
+Property ← pn:PropertyName ':' v:Value {
+    return graphql.Argument{Name:pn.(string), Value:v}, nil
+}
+PropertyName ← Name { return string(c.text), nil}
 
 Directives ← ds:Directive+ {
 	result := []graphql.Directive{}

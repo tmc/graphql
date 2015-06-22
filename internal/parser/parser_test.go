@@ -130,6 +130,8 @@ var shouldParse = []string{
 	  age: Int
 	  picture: Url
 	}`,
+	`{foo(bar:{baz:42})}`,
+	`{foo(bar:[42,32])}`,
 }
 
 func TestSuccessfulParses(t *testing.T) {
