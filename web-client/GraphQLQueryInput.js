@@ -1,8 +1,6 @@
 import React from 'react';
 import AceEditor from 'react-ace';
 
-import styles from './styles';
-
 var brace = require('brace');
 require('brace/mode/javascript');
 require('brace/theme/github');

@@ -50,8 +50,13 @@ export default class GraphQLWebClient extends React.Component {
   }
   queryBackend() {
     this.setState({queryState: 1});
+    var queryDelay = this.queryDelay;
     if (this.queryEvent !== null) { clearTimeout(this.queryEvent); }
-    if (this.xhr !== null) { this.xhr.abort(); }
+    if (this.xhr !== null) {
+      this.xhr.abort();
+    } else {
+      queryDelay = 0;
+    }
     this.queryEvent = setTimeout(() => {
       this.setState({queryState: 2});
       var xhr = new XMLHttpRequest();
@@ -66,7 +71,7 @@ export default class GraphQLWebClient extends React.Component {
       };
       xhr.send();
       this.xhr = xhr;
-    }, this.queryDelay);
+    }, queryDelay);
   }
   render() {
     return (
