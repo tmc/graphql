@@ -11,16 +11,11 @@ var divStyle = {
   width: "49%",
   border: "1px dotted #ccc"
 };
-var divStyleQuerying = {
-  margin: "auto",
-  width: "49%",
-  border: "1px solid #aaa"
-};
-var divStylePreQuerying = {
-  margin: "auto",
-  width: "49%",
-  border: "1px solid #000"
-};
+var divStyleQuerying = { border: "1px solid #aaa" };
+var divStylePreQuerying = { border: "1px solid #000" };
+Object.assign(divStyleQuerying, divStyle);
+Object.assign(divStylePreQuerying, divStyle);
+
 var styles = [divStyle, divStylePreQuerying, divStyleQuerying];
 
 
