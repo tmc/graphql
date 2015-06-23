@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/tmc/graphql/executor"
 	"github.com/tmc/graphql/executor/tracer"
@@ -58,14 +57,12 @@ func writeJSONIndent(w io.Writer, data interface{}, indentString string) {
 	}
 }
 
-var allowedHeaders = []string{"Content-Type", "X-Trace-Id", "X-GraphQL-Only-Parse"}
-
 // ServeHTTP provides an entrypoint into a graphql executor. It pulls the query from
 // the 'q' GET parameter.
 func (h *ExecutorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Headers", strings.Join(allowedHeaders, ", "))
+	w.Header().Set("Access-Control-Allow-Headers", r.Header.Get("Access-Control-Request-Headers"))
 	if r.Method == "OPTIONS" {
 		w.WriteHeader(200)
 		return
@@ -88,6 +85,7 @@ func (h *ExecutorHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			ctx = tracer.NewContext(ctx, t)
 		}
 	}
+	ctx = context.WithValue(ctx, "http_request", r)
 	if r.Header.Get("X-GraphQL-Only-Parse") == "1" {
 		writeJSONIndent(w, operation, " ")
 		return
