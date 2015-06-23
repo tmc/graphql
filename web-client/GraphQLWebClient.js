@@ -25,6 +25,9 @@ var styles = [divStyle, divStylePreQuerying, divStyleQuerying];
 
 
 export default class GraphQLWebClient extends React.Component {
+  defaultProps: {
+	extraheaders: []
+  }
   constructor(props) {
     super(props);
     this.state = {
@@ -73,6 +76,9 @@ export default class GraphQLWebClient extends React.Component {
       if (this.props.showParseResult) {
         xhr.setRequestHeader('X-GraphQL-Only-Parse', '1');
       }
+      this.props.extraHeaders.forEach((h) => {
+        xhr.setRequestHeader(h[0], h[1]);
+      });
       xhr.onload = () => {
           this.setState({response: xhr.responseText});
           this.setQueryState(0);
