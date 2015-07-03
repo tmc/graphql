@@ -4,7 +4,7 @@ module.exports = {
   module: { loaders: [
     { test: /\.css$/, loader: 'style!css' },
     { test: /\.scss$/, loader: 'style!sass' },
-    { test: /\.jsx?$/, loader: 'babel-loader?stage=0', exclude: /node_modules/ }
+    { test: /\.jsx?$/, loader: 'babel-loader?optional[]=runtime&stage=0', exclude: /node_modules/ }
   ] },
   externals: { 'react': 'React' }
 };

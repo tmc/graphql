@@ -2,27 +2,8 @@ import React from 'react';
 import GraphQLQueryInput from './GraphQLQueryInput';
 import GraphQLQueryResults from './GraphQLQueryResults';
 
-var parentDivStyle = {
-  display: "flex",
-  flexWrap: "wrap"
-};
-var divStyle = {
-  margin: "auto",
-  width: "49%",
-  border: "1px dotted #ccc"
-};
-var divStyleQuerying = { border: "1px solid #aaa" };
-var divStylePreQuerying = { border: "1px solid #000" };
-Object.assign(divStyleQuerying, divStyle);
-Object.assign(divStylePreQuerying, divStyle);
-
-var styles = [divStyle, divStylePreQuerying, divStyleQuerying];
-
 
 export default class GraphQLWebClient extends React.Component {
-  defaultProps: {
-	extraheaders: []
-  }
   constructor(props) {
     super(props);
     this.state = {
@@ -71,9 +52,6 @@ export default class GraphQLWebClient extends React.Component {
       if (this.props.showParseResult) {
         xhr.setRequestHeader('X-GraphQL-Only-Parse', '1');
       }
-      this.props.extraHeaders.forEach((h) => {
-        xhr.setRequestHeader(h[0], h[1]);
-      });
       xhr.onload = () => {
           this.setState({response: xhr.responseText});
           this.setQueryState(0);
@@ -88,11 +66,27 @@ export default class GraphQLWebClient extends React.Component {
        <div style={divStyle}>
        <GraphQLQueryInput query={this.state.query} onChange={this.onInputChange.bind(this)} />
        </div>
-       <div style={styles[this.state.queryState]}>
+       <div style={queryStateStyles[this.state.queryState]}>
        <GraphQLQueryResults results={this.state.response} />
        </div>
      </div>
     );
   }
 }
+
+var parentDivStyle = {
+  display: "flex",
+  flexWrap: "wrap"
+};
+var divStyle = {
+  margin: "auto",
+  width: "49%",
+  border: "1px dotted #ccc"
+};
+var divStyleQuerying = { border: "1px solid #aaa" };
+var divStylePreQuerying = { border: "1px solid #000" };
+Object.assign(divStyleQuerying, divStyle);
+Object.assign(divStylePreQuerying, divStyle);
+
+var queryStateStyles = [divStyle, divStylePreQuerying, divStyleQuerying];
 

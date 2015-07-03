@@ -10,6 +10,7 @@
   "devDependencies": {
     "webpack": "*",
     "react-hot-loader": "*",
+    "babel-runtime": "*",
     "webpack-dev-server": "*"
   }
 }
