@@ -3,7 +3,6 @@ package parser
 import (
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/tmc/graphql"
 	"github.com/tmc/graphql/internal/parser"
@@ -32,7 +31,6 @@ func (e ErrMalformedOperation) Error() string {
 func ParseOperation(query []byte) (*graphql.Operation, error) {
 	result, err := parser.Parse("", query)
 	if err != nil {
-		log.Println("parse error:", err)
 		return nil, ErrMalformedOperation{err}
 	}
 	doc, ok := result.(graphql.Document)
