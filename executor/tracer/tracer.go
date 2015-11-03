@@ -15,7 +15,6 @@ type Tracer struct {
 	ID                 uint64
 	startTime, endTime time.Time
 	Duration           time.Duration `json:"-"`
-	DurationMicros     int64
 	DurationMillis     int64
 	Extra              map[string]interface{} `json:",omitempty"`
 
@@ -58,7 +57,6 @@ func (t *Tracer) WithLock(fn func(*Tracer)) {
 func (t *Tracer) Done() {
 	t.endTime = time.Now()
 	t.Duration = t.endTime.Sub(t.startTime)
-	t.DurationMicros = t.Duration.Nanoseconds() / 1000
 	t.DurationMillis = t.Duration.Nanoseconds() / 1000000
 }
 

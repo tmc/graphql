@@ -80,6 +80,7 @@ type Argument struct {
 // Arguments is a collection of Argument values
 type Arguments []Argument
 
+// Get is a helper to fetch a particular argument by name.
 func (a Arguments) Get(name string) (interface{}, bool) {
 	for _, arg := range a {
 		if arg.Name == name {

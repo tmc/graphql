@@ -139,7 +139,7 @@ func TestSuccessfulParses(t *testing.T) {
 		//d, err := parser.Parse("parser_test.go", []byte(in), parser.Debug(true))
 		d, err := parser.Parse("parser_test.go", []byte(in))
 		if err != nil {
-			t.Errorf("case %d: %v", i+1, err)
+			t.Errorf("case %d: %v\n%s", i+1, err, in)
 		}
 		_ = d
 		//fmt.Println(in, "\n\n")
