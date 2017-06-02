@@ -1,10 +1,6 @@
 graphql
 =======
 
-# note: this project isn't actively developed.
-# I was just introduced to and endorse [github.com/neelance/graphql-go](https://github.com/neelance/graphql-go)
-
-
 utilities for dealing with GraphQL queries in Go.
 
 This package focuses on actually creating GraphQL servers and expects you to describe your schema directly in Go.
@@ -15,9 +11,9 @@ license: ISC
 
 version: Based on October2015 GraphQL Specification
 
-status: beta
+status: unstable
 
-contributions: welcomed
+contributions: encouraged
 
 
 hacking
